@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Smart Agent Hub"
+version = "1.0.0"
+id = "artifacts/smart-agent-hub"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24123
+
+[services.development]
+run = "pnpm --filter @workspace/smart-agent-hub run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/smart-agent-hub", "run", "build" ]
+publicDir = "artifacts/smart-agent-hub/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24123"
+BASE_PATH = "/"
