@@ -1,14 +1,14 @@
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { ExternalLink, Github, Smartphone } from "lucide-react";
-import { Product } from "@/data/products";
+import type { ApiProduct } from "@workspace/api-client-react";
 
 interface ProductCardProps {
-  product: Product;
+  product: ApiProduct;
   index?: number;
 }
 
-const statusColor: Record<Product["status"], string> = {
+const statusColor: Record<string, string> = {
   Active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   Beta: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   "Coming Soon": "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -37,7 +37,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           <div className={`w-12 h-12 rounded-xl ${product.accentColor} flex items-center justify-center text-white font-black text-lg shadow-lg`}>
             {product.name.charAt(0)}
           </div>
-          <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusColor[product.status]}`}>
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusColor[product.status] ?? statusColor["Active"]}`}>
             {product.status}
           </span>
         </div>

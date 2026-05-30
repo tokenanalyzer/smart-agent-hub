@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Link } from "wouter";
 import { motion, useInView } from "framer-motion";
 import { ArrowRight, Zap, Code2, Bot } from "lucide-react";
-import { products } from "@/data/products";
+import { useListProducts } from "@workspace/api-client-react";
 import ProductCard from "@/components/ProductCard";
 
 const stats = [
@@ -35,20 +35,19 @@ function FadeInSection({ children, delay = 0 }: { children: React.ReactNode; del
 }
 
 export default function HomePage() {
+  const { data: products = [] } = useListProducts();
   const featuredProducts = products.slice(0, 3);
 
   return (
     <div className="min-h-screen">
       {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-        {/* Background glow */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-primary/8 blur-[120px]" />
           <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px]" />
         </div>
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Logo mark */}
           <motion.div
             initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -58,7 +57,6 @@ export default function HomePage() {
             <span className="text-primary font-black text-2xl tracking-tight">S_A</span>
           </motion.div>
 
-          {/* Title */}
           <motion.h1
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -68,7 +66,6 @@ export default function HomePage() {
             SMART AGENT HUB
           </motion.h1>
 
-          {/* Animated tags */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
             {heroTags.map((tag, i) => (
               <motion.span
@@ -83,7 +80,6 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Tagline */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -95,7 +91,6 @@ export default function HomePage() {
             Built for Real-World Use.
           </motion.p>
 
-          {/* CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -115,7 +110,6 @@ export default function HomePage() {
             </Link>
           </motion.div>
 
-          {/* Stats */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -137,41 +131,43 @@ export default function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <FadeInSection>
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-2">Ecosystem</p>
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground">Featured Products</h2>
+      {featuredProducts.length > 0 && (
+        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <FadeInSection>
+            <div className="flex items-center justify-between mb-12">
+              <div>
+                <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-2">Ecosystem</p>
+                <h2 className="text-3xl sm:text-4xl font-bold text-foreground">Featured Products</h2>
+              </div>
+              <Link href="/products" data-testid="section-view-all">
+                <button className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group">
+                  View All
+                  <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                </button>
+              </Link>
             </div>
-            <Link href="/products" data-testid="section-view-all">
-              <button className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group">
-                View All
-                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-            </Link>
-          </div>
-        </FadeInSection>
+          </FadeInSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredProducts.map((product, i) => (
-            <FadeInSection key={product.id} delay={i * 0.1}>
-              <ProductCard product={product} index={0} />
-            </FadeInSection>
-          ))}
-        </div>
-
-        <FadeInSection delay={0.3}>
-          <div className="flex justify-center mt-10 sm:hidden">
-            <Link href="/products">
-              <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group">
-                View All Products
-                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-            </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredProducts.map((product, i) => (
+              <FadeInSection key={product.id} delay={i * 0.1}>
+                <ProductCard product={product} index={0} />
+              </FadeInSection>
+            ))}
           </div>
-        </FadeInSection>
-      </section>
+
+          <FadeInSection delay={0.3}>
+            <div className="flex justify-center mt-10 sm:hidden">
+              <Link href="/products">
+                <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group">
+                  View All Products
+                  <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                </button>
+              </Link>
+            </div>
+          </FadeInSection>
+        </section>
+      )}
 
       {/* About Builder */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -216,7 +212,7 @@ export default function HomePage() {
                 Ready to Explore the Ecosystem?
               </h2>
               <p className="text-muted-foreground text-lg mb-8 max-w-lg mx-auto">
-                Browse all 6 products, read the latest updates, or get in touch.
+                Browse all products, read the latest updates, or get in touch.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/products" data-testid="cta-explore">

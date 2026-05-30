@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
-import { products } from "@/data/products";
+import { Search, Loader2 } from "lucide-react";
+import { useListProducts } from "@workspace/api-client-react";
 import ProductCard from "@/components/ProductCard";
 
 const categories = ["All", "Developer Suite", "Productivity & Automation", "Crypto Intelligence", "AI Assistant", "Prompt Engineering", "Content Automation"];
@@ -9,6 +9,7 @@ const categories = ["All", "Developer Suite", "Productivity & Automation", "Cryp
 export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const { data: products = [], isLoading } = useListProducts();
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -20,11 +21,10 @@ export default function ProductsPage() {
       const matchesCategory = activeCategory === "All" || p.category === activeCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [search, activeCategory]);
+  }, [products, search, activeCategory]);
 
   return (
     <div className="min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -38,7 +38,6 @@ export default function ProductsPage() {
         </p>
       </motion.div>
 
-      {/* Search */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -56,7 +55,6 @@ export default function ProductsPage() {
         />
       </motion.div>
 
-      {/* Category filters */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -79,19 +77,19 @@ export default function ProductsPage() {
         ))}
       </motion.div>
 
-      {/* Grid */}
-      {filtered.length > 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-24 gap-3 text-muted-foreground">
+          <Loader2 size={20} className="animate-spin" />
+          <span>Loading products…</span>
+        </div>
+      ) : filtered.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((product, i) => (
             <ProductCard key={product.id} product={product} index={i} />
           ))}
         </div>
       ) : (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-24"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-24">
           <div className="w-14 h-14 rounded-2xl bg-card/60 border border-white/8 flex items-center justify-center mx-auto mb-4">
             <Search size={20} className="text-muted-foreground" />
           </div>

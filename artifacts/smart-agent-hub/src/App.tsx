@@ -10,11 +10,23 @@ import ProductDetailPage from "@/pages/product-detail";
 import AboutPage from "@/pages/about";
 import HelpPage from "@/pages/help";
 import UpdatesPage from "@/pages/updates";
+import AdminPage from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      retry: 1,
+    },
+  },
+});
 
-function Router() {
+function AdminLayout() {
+  return <AdminPage />;
+}
+
+function PublicLayout() {
   return (
     <>
       <Navbar />
@@ -31,6 +43,15 @@ function Router() {
       </main>
       <Footer />
     </>
+  );
+}
+
+function Router() {
+  return (
+    <Switch>
+      <Route path="/admin" component={AdminLayout} />
+      <Route component={PublicLayout} />
+    </Switch>
   );
 }
 

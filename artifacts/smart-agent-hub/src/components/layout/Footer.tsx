@@ -1,25 +1,18 @@
 import { Link } from "wouter";
 import { FaGithub, FaXTwitter, FaTelegram } from "react-icons/fa6";
+import { useListProducts } from "@workspace/api-client-react";
 
-const footerLinks = {
-  quickLinks: [
-    { label: "Home", href: "/" },
-    { label: "Products", href: "/products" },
-    { label: "About", href: "/about" },
-    { label: "Updates", href: "/updates" },
-    { label: "Help", href: "/help" },
-  ],
-  products: [
-    { label: "GhostHub", href: "/products/ghosthub" },
-    { label: "S_A.H Ultimate 8.7", href: "/products/sah-ultimate" },
-    { label: "TokenAnalyzer", href: "/products/tokenanalyzer" },
-    { label: "Nexa AI", href: "/products/nexa-ai" },
-    { label: "Prompt Pilot", href: "/products/prompt-pilot" },
-    { label: "Post Agent", href: "/products/post-agent" },
-  ],
-};
+const quickLinks = [
+  { label: "Home", href: "/" },
+  { label: "Products", href: "/products" },
+  { label: "About", href: "/about" },
+  { label: "Updates", href: "/updates" },
+  { label: "Help", href: "/help" },
+];
 
 export default function Footer() {
+  const { data: products = [] } = useListProducts();
+
   return (
     <footer className="border-t border-white/8 bg-background/60 backdrop-blur-sm mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
@@ -71,7 +64,7 @@ export default function Footer() {
           <div>
             <h3 className="text-foreground text-sm font-semibold mb-4 uppercase tracking-wider">Quick Links</h3>
             <ul className="space-y-2.5">
-              {footerLinks.quickLinks.map((link) => (
+              {quickLinks.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href}>
                     <span className="text-muted-foreground text-sm hover:text-foreground transition-colors cursor-pointer">
@@ -86,15 +79,25 @@ export default function Footer() {
           <div>
             <h3 className="text-foreground text-sm font-semibold mb-4 uppercase tracking-wider">Products</h3>
             <ul className="space-y-2.5">
-              {footerLinks.products.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href}>
+              {products.length > 0 ? (
+                products.map((p) => (
+                  <li key={p.id}>
+                    <Link href={`/products/${p.id}`}>
+                      <span className="text-muted-foreground text-sm hover:text-foreground transition-colors cursor-pointer">
+                        {p.name}
+                      </span>
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <li>
+                  <Link href="/products">
                     <span className="text-muted-foreground text-sm hover:text-foreground transition-colors cursor-pointer">
-                      {link.label}
+                      View All Products
                     </span>
                   </Link>
                 </li>
-              ))}
+              )}
             </ul>
           </div>
 

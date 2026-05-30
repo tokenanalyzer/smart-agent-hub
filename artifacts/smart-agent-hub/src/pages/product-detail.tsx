@@ -1,7 +1,7 @@
 import { useParams, Link } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft, ExternalLink, Smartphone, Github, CheckCircle2 } from "lucide-react";
-import { products } from "@/data/products";
+import { ArrowLeft, ExternalLink, Smartphone, Github, CheckCircle2, Loader2 } from "lucide-react";
+import { useGetProduct } from "@workspace/api-client-react";
 
 const statusColor: Record<string, string> = {
   Active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -19,9 +19,24 @@ const screenshotGradients = [
 
 export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
-  const product = products.find((p) => p.id === params.id);
+  const numericId = parseInt(params.id ?? "", 10);
+  const { data: product, isLoading, isError } = useGetProduct(numericId, {
+    query: {
+      enabled: !isNaN(numericId),
+      queryKey: [`/api/products/${numericId}`],
+    },
+  });
 
-  if (!product) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pt-28 flex items-center justify-center gap-3 text-muted-foreground">
+        <Loader2 size={20} className="animate-spin" />
+        <span>Loading product…</span>
+      </div>
+    );
+  }
+
+  if (isError || !product) {
     return (
       <div className="min-h-screen pt-28 flex items-center justify-center">
         <div className="text-center">
@@ -39,7 +54,6 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
-      {/* Back */}
       <motion.div
         initial={{ opacity: 0, x: -16 }}
         animate={{ opacity: 1, x: 0 }}
@@ -54,7 +68,6 @@ export default function ProductDetailPage() {
         </Link>
       </motion.div>
 
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -70,7 +83,7 @@ export default function ProductDetailPage() {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3 mb-2">
                 <h1 className="text-3xl sm:text-4xl font-black text-foreground" data-testid="text-product-name">{product.name}</h1>
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusColor[product.status]}`}>
+                <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusColor[product.status] ?? statusColor["Active"]}`}>
                   {product.status}
                 </span>
               </div>
@@ -87,7 +100,6 @@ export default function ProductDetailPage() {
             {product.description}
           </p>
 
-          {/* Link buttons */}
           <div className="flex flex-wrap gap-3">
             {product.websiteUrl && (
               <a
@@ -129,7 +141,6 @@ export default function ProductDetailPage() {
         </div>
       </motion.div>
 
-      {/* Screenshots */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -157,7 +168,6 @@ export default function ProductDetailPage() {
         </div>
       </motion.div>
 
-      {/* Features */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -168,7 +178,7 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {product.features.map((feature, i) => (
             <motion.div
-              key={feature}
+              key={i}
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, delay: 0.25 + i * 0.06 }}
