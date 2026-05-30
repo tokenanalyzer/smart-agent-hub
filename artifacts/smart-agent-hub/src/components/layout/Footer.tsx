@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { FaGithub, FaXTwitter, FaTelegram } from "react-icons/fa6";
+import { FaGithub, FaXTwitter, FaTelegram, FaLinkedin } from "react-icons/fa6";
 import { useListProducts } from "@workspace/api-client-react";
 
 const quickLinks = [
@@ -18,45 +18,52 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center">
-                <span className="text-primary font-black text-sm tracking-tight">S_A</span>
+                <span className="text-primary font-black text-sm tracking-tight">SAH</span>
               </div>
-              <span className="text-foreground font-bold text-base">SMART AGENT HUB</span>
+              <span className="text-foreground font-bold text-base">SAH Ecosystem</span>
             </div>
+            <p className="text-primary/70 text-xs font-medium tracking-widest uppercase mb-4">Build. Automate. Scale.</p>
             <p className="text-muted-foreground text-sm leading-relaxed mb-6">
               One Ecosystem. Multiple Products. Built for Real-World Use.
             </p>
             <div className="flex items-center gap-3">
               <a
-                href="https://github.com"
+                href="https://github.com/tokenanalyzer"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
-                data-testid="footer-social-github"
                 aria-label="GitHub"
               >
-                <FaGithub size={16} />
+                <FaGithub size={15} />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://twitter.com/Husain3413"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
-                data-testid="footer-social-twitter"
-                aria-label="Twitter/X"
+                aria-label="X / Twitter"
               >
-                <FaXTwitter size={16} />
+                <FaXTwitter size={15} />
               </a>
               <a
-                href="https://telegram.org"
+                href="https://t.me/dil3413"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
-                data-testid="footer-social-telegram"
                 aria-label="Telegram"
               >
-                <FaTelegram size={16} />
+                <FaTelegram size={15} />
+              </a>
+              <a
+                href="https://linkedin.com/in/adil-hussain"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                aria-label="LinkedIn"
+              >
+                <FaLinkedin size={15} />
               </a>
             </div>
           </div>
@@ -102,21 +109,21 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-foreground text-sm font-semibold mb-4 uppercase tracking-wider">Connect</h3>
+            <h3 className="text-foreground text-sm font-semibold mb-4 uppercase tracking-wider">Contact</h3>
             <ul className="space-y-2.5">
               <li>
-                <a href="mailto:support@smartagenthub.io" className="text-muted-foreground text-sm hover:text-foreground transition-colors">
-                  support@smartagenthub.io
+                <a href="mailto:adilcryptonews@gmail.com" className="text-muted-foreground text-sm hover:text-foreground transition-colors">
+                  adilcryptonews@gmail.com
                 </a>
               </li>
               <li>
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground text-sm hover:text-foreground transition-colors">
-                  GitHub
+                <a href="https://t.me/dil3413" target="_blank" rel="noopener noreferrer" className="text-muted-foreground text-sm hover:text-foreground transition-colors">
+                  Telegram: @dil3413
                 </a>
               </li>
               <li>
-                <a href="https://t.me/SmartAgentHub" target="_blank" rel="noopener noreferrer" className="text-muted-foreground text-sm hover:text-foreground transition-colors">
-                  Telegram
+                <a href="https://wa.me/919967873413" target="_blank" rel="noopener noreferrer" className="text-muted-foreground text-sm hover:text-foreground transition-colors">
+                  WhatsApp
                 </a>
               </li>
               <li>
@@ -132,10 +139,10 @@ export default function Footer() {
 
         <div className="mt-12 pt-8 border-t border-white/8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-muted-foreground text-sm">
-            &copy; 2026 Smart Agent Hub. Built by Adil Hussain. All rights reserved.
+            &copy; 2026 SAH Ecosystem. Built by Adil Husain. All rights reserved.
           </p>
-          <p className="text-muted-foreground/60 text-xs">
-            AI Applications &bull; Automation Systems &bull; Developer Tools
+          <p className="text-muted-foreground/50 text-xs tracking-widest uppercase">
+            Build. Automate. Scale.
           </p>
         </div>
       </div>

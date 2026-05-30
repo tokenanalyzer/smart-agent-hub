@@ -29,9 +29,15 @@ export const ListProductsResponseItem = zod.object({
   "version": zod.string(),
   "status": zod.string(),
   "features": zod.array(zod.string()),
+  "logoUrl": zod.string().nullish(),
   "websiteUrl": zod.string().nullish(),
   "apkUrl": zod.string().nullish(),
   "githubUrl": zod.string().nullish(),
+  "telegramUrl": zod.string().nullish(),
+  "screenshot1Url": zod.string().nullish(),
+  "screenshot2Url": zod.string().nullish(),
+  "screenshot3Url": zod.string().nullish(),
+  "screenshot4Url": zod.string().nullish(),
   "accentColor": zod.string(),
   "sortOrder": zod.number()
 })
@@ -56,9 +62,15 @@ export const CreateProductBody = zod.object({
   "version": zod.string().min(1),
   "status": zod.string(),
   "features": zod.array(zod.string()),
+  "logoUrl": zod.string().nullish(),
   "websiteUrl": zod.string().nullish(),
   "apkUrl": zod.string().nullish(),
   "githubUrl": zod.string().nullish(),
+  "telegramUrl": zod.string().nullish(),
+  "screenshot1Url": zod.string().nullish(),
+  "screenshot2Url": zod.string().nullish(),
+  "screenshot3Url": zod.string().nullish(),
+  "screenshot4Url": zod.string().nullish(),
   "accentColor": zod.string(),
   "sortOrder": zod.number()
 })
@@ -80,9 +92,15 @@ export const GetProductResponse = zod.object({
   "version": zod.string(),
   "status": zod.string(),
   "features": zod.array(zod.string()),
+  "logoUrl": zod.string().nullish(),
   "websiteUrl": zod.string().nullish(),
   "apkUrl": zod.string().nullish(),
   "githubUrl": zod.string().nullish(),
+  "telegramUrl": zod.string().nullish(),
+  "screenshot1Url": zod.string().nullish(),
+  "screenshot2Url": zod.string().nullish(),
+  "screenshot3Url": zod.string().nullish(),
+  "screenshot4Url": zod.string().nullish(),
   "accentColor": zod.string(),
   "sortOrder": zod.number()
 })
@@ -110,9 +128,15 @@ export const UpdateProductBody = zod.object({
   "version": zod.string().min(1).optional(),
   "status": zod.string().optional(),
   "features": zod.array(zod.string()).optional(),
+  "logoUrl": zod.string().nullish(),
   "websiteUrl": zod.string().nullish(),
   "apkUrl": zod.string().nullish(),
   "githubUrl": zod.string().nullish(),
+  "telegramUrl": zod.string().nullish(),
+  "screenshot1Url": zod.string().nullish(),
+  "screenshot2Url": zod.string().nullish(),
+  "screenshot3Url": zod.string().nullish(),
+  "screenshot4Url": zod.string().nullish(),
   "accentColor": zod.string().optional(),
   "sortOrder": zod.number().optional()
 })
@@ -126,9 +150,15 @@ export const UpdateProductResponse = zod.object({
   "version": zod.string(),
   "status": zod.string(),
   "features": zod.array(zod.string()),
+  "logoUrl": zod.string().nullish(),
   "websiteUrl": zod.string().nullish(),
   "apkUrl": zod.string().nullish(),
   "githubUrl": zod.string().nullish(),
+  "telegramUrl": zod.string().nullish(),
+  "screenshot1Url": zod.string().nullish(),
+  "screenshot2Url": zod.string().nullish(),
+  "screenshot3Url": zod.string().nullish(),
+  "screenshot4Url": zod.string().nullish(),
   "accentColor": zod.string(),
   "sortOrder": zod.number()
 })
@@ -143,6 +173,21 @@ export const DeleteProductParams = zod.object({
 
 export const DeleteProductResponse = zod.object({
   "success": zod.boolean()
+})
+
+
+/**
+ * @summary Request a presigned upload URL
+ */
+export const RequestUploadUrlBody = zod.object({
+  "name": zod.string(),
+  "size": zod.number(),
+  "contentType": zod.string()
+})
+
+export const RequestUploadUrlResponse = zod.object({
+  "uploadURL": zod.string(),
+  "objectPath": zod.string()
 })
 
 

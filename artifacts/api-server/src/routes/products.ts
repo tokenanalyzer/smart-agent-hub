@@ -52,7 +52,7 @@ router.post("/products", async (req: Request, res: Response) => {
 });
 
 router.get("/products/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     res.status(404).json({ error: "Product not found" });
     return;
@@ -79,7 +79,7 @@ router.get("/products/:id", async (req: Request, res: Response) => {
 });
 
 router.put("/products/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     res.status(404).json({ error: "Product not found" });
     return;
@@ -116,7 +116,7 @@ router.put("/products/:id", async (req: Request, res: Response) => {
 });
 
 router.delete("/products/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     res.status(404).json({ error: "Product not found" });
     return;

@@ -12,3 +12,5 @@ export * from './errorResponse';
 export * from './healthStatus';
 export * from './productInput';
 export * from './productUpdate';
+export * from './requestUploadUrlBody';
+export * from './requestUploadUrlResponse';

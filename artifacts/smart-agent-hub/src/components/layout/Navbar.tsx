@@ -40,10 +40,10 @@ export default function Navbar() {
             <Link href="/" data-testid="nav-logo">
               <div className="flex items-center gap-3 group cursor-pointer">
                 <div className="w-9 h-9 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
-                  <span className="text-primary font-black text-sm tracking-tight">S_A</span>
+                  <span className="text-primary font-black text-sm tracking-tight">SAH</span>
                 </div>
                 <div className="hidden sm:block">
-                  <span className="text-foreground font-bold text-base tracking-wide">SMART AGENT HUB</span>
+                  <span className="text-foreground font-bold text-base tracking-wide">SAH Ecosystem</span>
                 </div>
               </div>
             </Link>

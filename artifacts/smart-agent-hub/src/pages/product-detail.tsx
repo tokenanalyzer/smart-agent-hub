@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { useParams, Link } from "wouter";
-import { motion } from "framer-motion";
-import { ArrowLeft, ExternalLink, Smartphone, Github, CheckCircle2, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, ExternalLink, Smartphone, Github, CheckCircle2, Loader2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { FaTelegram } from "react-icons/fa6";
 import { useGetProduct } from "@workspace/api-client-react";
+import { storageUrl } from "@/lib/storage";
 
 const statusColor: Record<string, string> = {
   Active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -9,22 +12,111 @@ const statusColor: Record<string, string> = {
   "Coming Soon": "bg-blue-500/10 text-blue-400 border-blue-500/20",
 };
 
-const screenshotLabels = ["Overview", "Dashboard", "Settings", "Mobile View"];
-const screenshotGradients = [
+const placeholderGradients = [
   "from-violet-900/60 to-purple-900/40",
   "from-indigo-900/60 to-blue-900/40",
   "from-fuchsia-900/60 to-pink-900/40",
   "from-slate-900/60 to-zinc-800/40",
 ];
 
+function ScreenshotGallery({ urls }: { urls: (string | null)[] }) {
+  const [lightbox, setLightbox] = useState<number | null>(null);
+
+  const screenshots = urls.map((url, i) => ({
+    src: url ? storageUrl(url) : null,
+    label: ["Overview", "Dashboard", "Settings", "Mobile"][i] ?? `Screen ${i + 1}`,
+    gradient: placeholderGradients[i % placeholderGradients.length],
+  }));
+
+  const openLightbox = (i: number) => {
+    if (screenshots[i].src) setLightbox(i);
+  };
+
+  const prev = () => setLightbox((l) => (l !== null ? (l - 1 + screenshots.length) % screenshots.length : null));
+  const next = () => setLightbox((l) => (l !== null ? (l + 1) % screenshots.length : null));
+
+  return (
+    <>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {screenshots.map((s, i) => (
+          <div
+            key={i}
+            onClick={() => openLightbox(i)}
+            className={`aspect-video rounded-xl bg-gradient-to-br ${s.gradient} border border-white/8 flex flex-col items-center justify-center overflow-hidden relative group ${s.src ? "cursor-zoom-in hover:border-white/20" : ""} transition-all`}
+            data-testid={`screenshot-${i}`}
+          >
+            {s.src ? (
+              <>
+                <img src={s.src} alt={s.label} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <span className="text-white/0 group-hover:text-white/80 text-xs font-medium transition-colors">{s.label}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="absolute inset-0 opacity-20">
+                  <div className="absolute top-3 left-3 right-3 h-1.5 rounded bg-white/30" />
+                  <div className="absolute top-7 left-3 right-6 h-1 rounded bg-white/20" />
+                  <div className="absolute top-10 left-3 right-8 h-1 rounded bg-white/15" />
+                  <div className="absolute top-14 left-3 w-8 h-8 rounded-lg bg-white/20" />
+                  <div className="absolute top-14 left-14 right-3 h-8 rounded-lg bg-white/10" />
+                </div>
+                <span className="absolute bottom-2 left-3 text-white/40 text-xs font-medium">{s.label}</span>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {lightbox !== null && screenshots[lightbox].src && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setLightbox(null)}
+          >
+            <button
+              onClick={() => setLightbox(null)}
+              className="absolute top-4 right-4 p-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
+            >
+              <X size={20} />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); prev(); }}
+              className="absolute left-4 p-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <motion.img
+              key={lightbox}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              src={screenshots[lightbox].src!}
+              alt={screenshots[lightbox].label}
+              className="max-w-4xl max-h-[80vh] w-full object-contain rounded-xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              onClick={(e) => { e.stopPropagation(); next(); }}
+              className="absolute right-4 p-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
+            >
+              <ChevronRight size={24} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
 export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
   const numericId = parseInt(params.id ?? "", 10);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: product, isLoading, isError } = useGetProduct(numericId, {
-    query: {
-      enabled: !isNaN(numericId),
-      queryKey: [`/api/products/${numericId}`],
-    },
+    query: { enabled: !isNaN(numericId) } as any,
   });
 
   if (isLoading) {
@@ -52,14 +144,12 @@ export default function ProductDetailPage() {
     );
   }
 
+  const logoSrc = storageUrl(product.logoUrl);
+  const screenshotUrls = [product.screenshot1Url ?? null, product.screenshot2Url ?? null, product.screenshot3Url ?? null, product.screenshot4Url ?? null];
+
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, x: -16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4 }}
-        className="mb-8"
-      >
+      <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }} className="mb-8">
         <Link href="/products" data-testid="link-back-products">
           <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group">
             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
@@ -68,6 +158,7 @@ export default function ProductDetailPage() {
         </Link>
       </motion.div>
 
+      {/* Hero card */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -77,8 +168,12 @@ export default function ProductDetailPage() {
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-primary/6 blur-[80px] pointer-events-none" />
         <div className="relative z-10">
           <div className="flex flex-col sm:flex-row sm:items-start gap-6 mb-6">
-            <div className={`w-16 h-16 rounded-2xl ${product.accentColor} flex items-center justify-center text-white font-black text-2xl shadow-xl flex-shrink-0`}>
-              {product.name.charAt(0)}
+            <div className={`w-16 h-16 rounded-2xl ${logoSrc ? "bg-card/60 border border-white/10" : product.accentColor} flex items-center justify-center text-white font-black text-2xl shadow-xl flex-shrink-0 overflow-hidden`}>
+              {logoSrc ? (
+                <img src={logoSrc} alt={product.name} className="w-full h-full object-cover" />
+              ) : (
+                product.name.charAt(0)
+              )}
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3 mb-2">
@@ -102,37 +197,29 @@ export default function ProductDetailPage() {
 
           <div className="flex flex-wrap gap-3">
             {product.websiteUrl && (
-              <a
-                href={product.websiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid="button-website"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 active:scale-95 transition-all"
-              >
+              <a href={product.websiteUrl} target="_blank" rel="noopener noreferrer" data-testid="button-website"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 active:scale-95 transition-all">
                 <ExternalLink size={14} />
                 Visit Website
               </a>
             )}
+            {product.telegramUrl && (
+              <a href={product.telegramUrl} target="_blank" rel="noopener noreferrer" data-testid="button-telegram"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 text-white font-semibold text-sm hover:bg-sky-500 active:scale-95 transition-all">
+                <FaTelegram size={14} />
+                Telegram
+              </a>
+            )}
             {product.apkUrl && (
-              <a
-                href={product.apkUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid="button-apk"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/15 text-foreground font-semibold text-sm hover:bg-white/5 active:scale-95 transition-all"
-              >
+              <a href={product.apkUrl} target="_blank" rel="noopener noreferrer" data-testid="button-apk"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/15 text-foreground font-semibold text-sm hover:bg-white/5 active:scale-95 transition-all">
                 <Smartphone size={14} />
                 Download APK
               </a>
             )}
             {product.githubUrl && (
-              <a
-                href={product.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid="button-github"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/15 text-foreground font-semibold text-sm hover:bg-white/5 active:scale-95 transition-all"
-              >
+              <a href={product.githubUrl} target="_blank" rel="noopener noreferrer" data-testid="button-github"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/15 text-foreground font-semibold text-sm hover:bg-white/5 active:scale-95 transition-all">
                 <Github size={14} />
                 GitHub
               </a>
@@ -141,6 +228,7 @@ export default function ProductDetailPage() {
         </div>
       </motion.div>
 
+      {/* Screenshots */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -148,26 +236,10 @@ export default function ProductDetailPage() {
         className="mb-8"
       >
         <h2 className="text-xl font-bold text-foreground mb-4">Screenshots</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {screenshotLabels.map((label, i) => (
-            <div
-              key={label}
-              className={`aspect-video rounded-xl bg-gradient-to-br ${screenshotGradients[i]} border border-white/8 flex items-end p-3 overflow-hidden relative`}
-              data-testid={`screenshot-${i}`}
-            >
-              <div className="absolute inset-0 opacity-20">
-                <div className="absolute top-3 left-3 right-3 h-1.5 rounded bg-white/30" />
-                <div className="absolute top-7 left-3 right-6 h-1 rounded bg-white/20" />
-                <div className="absolute top-10 left-3 right-8 h-1 rounded bg-white/15" />
-                <div className="absolute top-14 left-3 w-8 h-8 rounded-lg bg-white/20" />
-                <div className="absolute top-14 left-14 right-3 h-8 rounded-lg bg-white/10" />
-              </div>
-              <span className="relative z-10 text-white/60 text-xs font-medium">{label}</span>
-            </div>
-          ))}
-        </div>
+        <ScreenshotGallery urls={screenshotUrls} />
       </motion.div>
 
+      {/* Features */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}

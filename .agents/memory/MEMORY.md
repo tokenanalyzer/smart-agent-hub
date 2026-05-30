@@ -1,0 +1,3 @@
+- [api-zod export conflict](api-zod-export-conflict.md) — Zod schema constants and TS interfaces share names; use explicit type re-exports to avoid collision.
+- [express5-params-typing](express5-params-typing.md) — req.params values are string|string[] in Express 5; always cast with String() before parseInt.
+- [orval-usequery-options](orval-usequery-options.md) — Generated useGetProduct query options require queryKey at TS level; pass inner query object as `as any` for conditional enabled.

@@ -19,11 +19,23 @@ export interface ApiProduct {
   status: string;
   features: string[];
   /** @nullable */
+  logoUrl?: string | null;
+  /** @nullable */
   websiteUrl?: string | null;
   /** @nullable */
   apkUrl?: string | null;
   /** @nullable */
   githubUrl?: string | null;
+  /** @nullable */
+  telegramUrl?: string | null;
+  /** @nullable */
+  screenshot1Url?: string | null;
+  /** @nullable */
+  screenshot2Url?: string | null;
+  /** @nullable */
+  screenshot3Url?: string | null;
+  /** @nullable */
+  screenshot4Url?: string | null;
   accentColor: string;
   sortOrder: number;
 }
@@ -42,11 +54,23 @@ export interface ProductInput {
   status: string;
   features: string[];
   /** @nullable */
+  logoUrl?: string | null;
+  /** @nullable */
   websiteUrl?: string | null;
   /** @nullable */
   apkUrl?: string | null;
   /** @nullable */
   githubUrl?: string | null;
+  /** @nullable */
+  telegramUrl?: string | null;
+  /** @nullable */
+  screenshot1Url?: string | null;
+  /** @nullable */
+  screenshot2Url?: string | null;
+  /** @nullable */
+  screenshot3Url?: string | null;
+  /** @nullable */
+  screenshot4Url?: string | null;
   accentColor: string;
   sortOrder: number;
 }
@@ -65,13 +89,36 @@ export interface ProductUpdate {
   status?: string;
   features?: string[];
   /** @nullable */
+  logoUrl?: string | null;
+  /** @nullable */
   websiteUrl?: string | null;
   /** @nullable */
   apkUrl?: string | null;
   /** @nullable */
   githubUrl?: string | null;
+  /** @nullable */
+  telegramUrl?: string | null;
+  /** @nullable */
+  screenshot1Url?: string | null;
+  /** @nullable */
+  screenshot2Url?: string | null;
+  /** @nullable */
+  screenshot3Url?: string | null;
+  /** @nullable */
+  screenshot4Url?: string | null;
   accentColor?: string;
   sortOrder?: number;
+}
+
+export interface RequestUploadUrlBody {
+  name: string;
+  size: number;
+  contentType: string;
+}
+
+export interface RequestUploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
 }
 
 export interface ErrorResponse {

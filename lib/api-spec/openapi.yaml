@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: products
     description: Product management
+  - name: storage
+    description: Object storage
 paths:
   /healthz:
     get:
@@ -148,6 +150,31 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a presigned upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestUploadUrlBody"
+      responses:
+        "200":
+          description: Presigned upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestUploadUrlResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -179,11 +206,23 @@ components:
           type: array
           items:
             type: string
+        logoUrl:
+          type: ["string", "null"]
         websiteUrl:
           type: ["string", "null"]
         apkUrl:
           type: ["string", "null"]
         githubUrl:
+          type: ["string", "null"]
+        telegramUrl:
+          type: ["string", "null"]
+        screenshot1Url:
+          type: ["string", "null"]
+        screenshot2Url:
+          type: ["string", "null"]
+        screenshot3Url:
+          type: ["string", "null"]
+        screenshot4Url:
           type: ["string", "null"]
         accentColor:
           type: string
@@ -225,11 +264,23 @@ components:
           type: array
           items:
             type: string
+        logoUrl:
+          type: ["string", "null"]
         websiteUrl:
           type: ["string", "null"]
         apkUrl:
           type: ["string", "null"]
         githubUrl:
+          type: ["string", "null"]
+        telegramUrl:
+          type: ["string", "null"]
+        screenshot1Url:
+          type: ["string", "null"]
+        screenshot2Url:
+          type: ["string", "null"]
+        screenshot3Url:
+          type: ["string", "null"]
+        screenshot4Url:
           type: ["string", "null"]
         accentColor:
           type: string
@@ -270,16 +321,53 @@ components:
           type: array
           items:
             type: string
+        logoUrl:
+          type: ["string", "null"]
         websiteUrl:
           type: ["string", "null"]
         apkUrl:
           type: ["string", "null"]
         githubUrl:
           type: ["string", "null"]
+        telegramUrl:
+          type: ["string", "null"]
+        screenshot1Url:
+          type: ["string", "null"]
+        screenshot2Url:
+          type: ["string", "null"]
+        screenshot3Url:
+          type: ["string", "null"]
+        screenshot4Url:
+          type: ["string", "null"]
         accentColor:
           type: string
         sortOrder:
           type: integer
+
+    RequestUploadUrlBody:
+      type: object
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+        contentType:
+          type: string
+      required:
+        - name
+        - size
+        - contentType
+
+    RequestUploadUrlResponse:
+      type: object
+      properties:
+        uploadURL:
+          type: string
+        objectPath:
+          type: string
+      required:
+        - uploadURL
+        - objectPath
 
     ErrorResponse:
       type: object

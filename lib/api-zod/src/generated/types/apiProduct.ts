@@ -16,11 +16,23 @@ export interface ApiProduct {
   status: string;
   features: string[];
   /** @nullable */
+  logoUrl?: string | null;
+  /** @nullable */
   websiteUrl?: string | null;
   /** @nullable */
   apkUrl?: string | null;
   /** @nullable */
   githubUrl?: string | null;
+  /** @nullable */
+  telegramUrl?: string | null;
+  /** @nullable */
+  screenshot1Url?: string | null;
+  /** @nullable */
+  screenshot2Url?: string | null;
+  /** @nullable */
+  screenshot3Url?: string | null;
+  /** @nullable */
+  screenshot4Url?: string | null;
   accentColor: string;
   sortOrder: number;
 }
