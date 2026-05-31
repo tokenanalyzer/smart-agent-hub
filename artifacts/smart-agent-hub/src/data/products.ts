@@ -28,10 +28,10 @@ export const products: Product[] = [
   },
   {
     id: "sah-ultimate",
-    name: "S_A.H Ultimate 8.7",
+    name: "S.A.H Ultimate 8.7",
     category: "Productivity & Automation",
     tagline: "The ultimate automation suite for peak productivity.",
-    description: "S_A.H Ultimate is the flagship productivity and automation platform. Combines task automation, workflow orchestration, and AI-powered scheduling into a single unified workspace for individuals and teams.",
+    description: "S.A.H Ultimate is the flagship productivity and automation platform. Combines task automation, workflow orchestration, and AI-powered scheduling into a single unified workspace for individuals and teams.",
     version: "v8.7.0",
     status: "Active",
     features: ["Workflow automation engine", "AI task scheduling", "Cross-app integrations", "Smart notifications", "Analytics dashboard", "Mobile companion app"],

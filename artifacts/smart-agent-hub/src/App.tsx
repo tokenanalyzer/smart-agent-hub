@@ -1,17 +1,28 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import HomePage from "@/pages/home";
-import ProductsPage from "@/pages/products";
-import ProductDetailPage from "@/pages/product-detail";
-import AboutPage from "@/pages/about";
-import HelpPage from "@/pages/help";
-import UpdatesPage from "@/pages/updates";
-import AdminPage from "@/pages/admin";
-import NotFound from "@/pages/not-found";
+import { Loader2 } from "lucide-react";
+
+const HomePage = lazy(() => import("@/pages/home"));
+const ProductsPage = lazy(() => import("@/pages/products"));
+const ProductDetailPage = lazy(() => import("@/pages/product-detail"));
+const AboutPage = lazy(() => import("@/pages/about"));
+const HelpPage = lazy(() => import("@/pages/help"));
+const UpdatesPage = lazy(() => import("@/pages/updates"));
+const AdminPage = lazy(() => import("@/pages/admin"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Loader2 size={20} className="animate-spin text-primary/50" />
+    </div>
+  );
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,7 +34,11 @@ const queryClient = new QueryClient({
 });
 
 function AdminLayout() {
-  return <AdminPage />;
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <AdminPage />
+    </Suspense>
+  );
 }
 
 function PublicLayout() {
@@ -31,15 +46,17 @@ function PublicLayout() {
     <>
       <Navbar />
       <main>
-        <Switch>
-          <Route path="/" component={HomePage} />
-          <Route path="/products" component={ProductsPage} />
-          <Route path="/products/:id" component={ProductDetailPage} />
-          <Route path="/about" component={AboutPage} />
-          <Route path="/help" component={HelpPage} />
-          <Route path="/updates" component={UpdatesPage} />
-          <Route component={NotFound} />
-        </Switch>
+        <Suspense fallback={<PageLoader />}>
+          <Switch>
+            <Route path="/" component={HomePage} />
+            <Route path="/products" component={ProductsPage} />
+            <Route path="/products/:id" component={ProductDetailPage} />
+            <Route path="/about" component={AboutPage} />
+            <Route path="/help" component={HelpPage} />
+            <Route path="/updates" component={UpdatesPage} />
+            <Route component={NotFound} />
+          </Switch>
+        </Suspense>
       </main>
       <Footer />
     </>
