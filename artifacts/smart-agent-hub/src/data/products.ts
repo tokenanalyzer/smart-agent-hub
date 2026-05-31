@@ -10,7 +10,7 @@ export interface Product {
   websiteUrl?: string;
   apkUrl?: string;
   githubUrl?: string;
-  accentColor: string; // tailwind bg color class for the letter icon bg
+  accentColor: string;
 }
 
 export const products: Product[] = [
@@ -23,7 +23,6 @@ export const products: Product[] = [
     version: "v2.4.1",
     status: "Active",
     features: ["Automated CI/CD pipelines", "Zero-downtime deployments", "Infrastructure monitoring", "Multi-environment support", "Webhook integrations", "Team collaboration tools"],
-    githubUrl: "https://github.com",
     accentColor: "bg-violet-600"
   },
   {
@@ -35,7 +34,6 @@ export const products: Product[] = [
     version: "v8.7.0",
     status: "Active",
     features: ["Workflow automation engine", "AI task scheduling", "Cross-app integrations", "Smart notifications", "Analytics dashboard", "Mobile companion app"],
-    websiteUrl: "https://example.com",
     accentColor: "bg-purple-600"
   },
   {
@@ -47,7 +45,6 @@ export const products: Product[] = [
     version: "v1.8.3",
     status: "Beta",
     features: ["Real-time price feeds", "On-chain analytics", "Wallet tracking", "DeFi protocol monitoring", "Alert system", "Portfolio overview"],
-    githubUrl: "https://github.com",
     accentColor: "bg-indigo-600"
   },
   {
@@ -59,7 +56,6 @@ export const products: Product[] = [
     version: "v3.1.0",
     status: "Active",
     features: ["Long-term memory context", "Multi-modal inputs", "Custom AI personas", "Workflow integrations", "Voice interaction", "API access"],
-    websiteUrl: "https://example.com",
     accentColor: "bg-blue-600"
   },
   {
@@ -71,7 +67,6 @@ export const products: Product[] = [
     version: "v2.0.0",
     status: "Active",
     features: ["Visual prompt builder", "Multi-LLM testing", "Version control for prompts", "Performance benchmarking", "Team prompt library", "One-click deployment"],
-    githubUrl: "https://github.com",
     accentColor: "bg-fuchsia-600"
   },
   {
