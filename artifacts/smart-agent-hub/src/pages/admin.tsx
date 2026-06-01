@@ -2,17 +2,20 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  useListProducts,
+  useAdminLogin,
+  useAdminListProducts,
   useCreateProduct,
   useUpdateProduct,
+  useUpdateProductLifecycle,
   useDeleteProduct,
-  getListProductsQueryKey,
+  getAdminListProductsQueryKey,
 } from "@workspace/api-client-react";
 import type { ApiProduct, ProductInput } from "@workspace/api-client-react";
+import { setAuthTokenGetter } from "@workspace/api-client-react";
 import {
   Plus, Pencil, Trash2, ExternalLink, Github, Smartphone,
   Lock, Eye, EyeOff, X, Save, Loader2, AlertTriangle, ChevronUp, ChevronDown,
-  Image, Upload, CheckCircle2,
+  Image, Upload, CheckCircle2, Globe, Archive, RotateCcw, LogOut, User,
 } from "lucide-react";
 import { FaTelegram } from "react-icons/fa6";
 import { useForm } from "react-hook-form";
@@ -26,9 +29,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { storageUrl, uploadFile } from "@/lib/storage";
 
-const ADMIN_PASSWORD = "sah-admin-2024";
-const SESSION_KEY = "sah_admin_auth";
+const SESSION_KEY = "sah_admin_token";
 
+// ---------------------------------------------------------------------------
+// Auth token management — wires the JWT into every generated API hook
+// ---------------------------------------------------------------------------
+function getStoredToken(): string | null {
+  return sessionStorage.getItem(SESSION_KEY);
+}
+setAuthTokenGetter(getStoredToken);
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
 const ACCENT_COLORS = [
   { value: "bg-violet-600", label: "Violet" },
   { value: "bg-purple-600", label: "Purple" },
@@ -59,6 +72,15 @@ const statusColor: Record<string, string> = {
   "Coming Soon": "bg-blue-500/10 text-blue-400 border-blue-500/20",
 };
 
+const lifecycleBadge: Record<string, { label: string; cls: string }> = {
+  draft:     { label: "Draft",     cls: "bg-zinc-500/15 text-zinc-400 border-zinc-500/20" },
+  published: { label: "Published", cls: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20" },
+  archived:  { label: "Archived",  cls: "bg-red-500/15 text-red-400 border-red-500/20" },
+};
+
+// ---------------------------------------------------------------------------
+// Product form schema
+// ---------------------------------------------------------------------------
 const productSchema = z.object({
   name: z.string().min(1, "Required"),
   category: z.string().min(1, "Required"),
@@ -128,6 +150,9 @@ function productToForm(p: ApiProduct): ProductFormData {
   };
 }
 
+// ---------------------------------------------------------------------------
+// ImageUploadField
+// ---------------------------------------------------------------------------
 function ImageUploadField({
   label, value, onChange, testId,
 }: {
@@ -201,20 +226,32 @@ function ImageUploadField({
   );
 }
 
+// ---------------------------------------------------------------------------
+// LoginScreen — calls POST /api/auth/login, stores JWT
+// ---------------------------------------------------------------------------
 function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loginMutation = useAdminLogin({
+    mutation: {
+      onSuccess: (data) => {
+        sessionStorage.setItem(SESSION_KEY, data.token);
+        onSuccess();
+      },
+      onError: () => {
+        setError("Invalid credentials");
+        setTimeout(() => setError(null), 3000);
+      },
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      sessionStorage.setItem(SESSION_KEY, "1");
-      onSuccess();
-    } else {
-      setError(true);
-      setTimeout(() => setError(false), 2000);
-    }
+    if (!username.trim() || !password) return;
+    loginMutation.mutate({ data: { username: username.trim(), password } });
   };
 
   return (
@@ -231,17 +268,31 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
           </div>
           <h1 className="text-xl font-bold text-foreground mb-1">Admin Panel</h1>
           <p className="text-primary/70 text-xs font-semibold tracking-widest uppercase mb-6">SAH Ecosystem</p>
-          <p className="text-muted-foreground text-sm mb-8">Enter your admin password to continue.</p>
+          <p className="text-muted-foreground text-sm mb-8">Enter your admin credentials to continue.</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50">
+                <User size={14} />
+              </span>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
+                autoFocus
+                autoComplete="username"
+                className="w-full pl-9 pr-4 py-3 rounded-xl bg-background/60 border border-white/10 text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
+                data-testid="input-admin-username"
+              />
+            </div>
             <div className="relative">
               <input
                 type={show ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
-                autoFocus
-                autoComplete="new-password"
+                autoComplete="current-password"
                 className={`w-full px-4 py-3 pr-11 rounded-xl bg-background/60 border text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:ring-2 transition-all ${
                   error
                     ? "border-red-500/50 focus:ring-red-500/20"
@@ -260,15 +311,17 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
             {error && (
               <p className="text-red-400 text-xs flex items-center gap-1.5 justify-center">
                 <AlertTriangle size={12} />
-                Incorrect password
+                {error}
               </p>
             )}
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 active:scale-95 transition-all"
+              disabled={loginMutation.isPending}
+              className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
               data-testid="button-admin-login"
             >
-              Enter
+              {loginMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : null}
+              {loginMutation.isPending ? "Signing in…" : "Sign In"}
             </button>
           </form>
         </div>
@@ -277,6 +330,9 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// ProductFormDrawer
+// ---------------------------------------------------------------------------
 function ProductFormDrawer({
   product, onClose, onSave, isPending,
 }: {
@@ -503,6 +559,9 @@ function ProductFormDrawer({
   );
 }
 
+// ---------------------------------------------------------------------------
+// DeleteConfirm
+// ---------------------------------------------------------------------------
 function DeleteConfirm({ product, onCancel, onConfirm, isPending }: {
   product: ApiProduct; onCancel: () => void; onConfirm: () => void; isPending: boolean;
 }) {
@@ -518,7 +577,7 @@ function DeleteConfirm({ product, onCancel, onConfirm, isPending }: {
         </div>
         <h3 className="text-lg font-bold text-foreground mb-2">Delete Product</h3>
         <p className="text-muted-foreground text-sm mb-6">
-          Are you sure you want to delete <span className="text-foreground font-medium">{product.name}</span>?
+          Are you sure you want to delete <span className="text-foreground font-medium">{product.name}</span>? This cannot be undone.
         </p>
         <div className="flex gap-3">
           <button onClick={onCancel} className="flex-1 py-2.5 rounded-xl border border-white/10 text-muted-foreground text-sm font-medium hover:text-foreground transition-colors">Cancel</button>
@@ -531,40 +590,132 @@ function DeleteConfirm({ product, onCancel, onConfirm, isPending }: {
   );
 }
 
+// ---------------------------------------------------------------------------
+// LifecycleActions — Publish / Unpublish / Archive / Restore buttons
+// ---------------------------------------------------------------------------
+function LifecycleActions({
+  product,
+  onAction,
+  isPending,
+}: {
+  product: ApiProduct;
+  onAction: (state: "draft" | "published" | "archived") => void;
+  isPending: boolean;
+}) {
+  const state = product.publishedState;
+
+  return (
+    <div className="flex items-center gap-1">
+      {state !== "published" && (
+        <button
+          onClick={() => onAction("published")}
+          disabled={isPending}
+          title="Publish"
+          className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-emerald-400 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/20 transition-colors disabled:opacity-50"
+        >
+          <Globe size={12} />
+          Publish
+        </button>
+      )}
+      {state === "published" && (
+        <button
+          onClick={() => onAction("draft")}
+          disabled={isPending}
+          title="Unpublish (back to draft)"
+          className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-zinc-400 hover:bg-zinc-500/10 border border-transparent hover:border-zinc-500/20 transition-colors disabled:opacity-50"
+        >
+          <EyeOff size={12} />
+          Unpublish
+        </button>
+      )}
+      {state !== "archived" && (
+        <button
+          onClick={() => onAction("archived")}
+          disabled={isPending}
+          title="Archive"
+          className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-colors disabled:opacity-50"
+        >
+          <Archive size={12} />
+          Archive
+        </button>
+      )}
+      {state === "archived" && (
+        <button
+          onClick={() => onAction("draft")}
+          disabled={isPending}
+          title="Restore to draft"
+          className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-colors disabled:opacity-50"
+        >
+          <RotateCcw size={12} />
+          Restore
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// AdminDashboard
+// ---------------------------------------------------------------------------
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const queryClient = useQueryClient();
   const [drawerProduct, setDrawerProduct] = useState<ApiProduct | null | "new">(null);
   const [deleteTarget, setDeleteTarget] = useState<ApiProduct | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
-  const { data: products = [], isLoading } = useListProducts();
+  const { data: products = [], isLoading } = useAdminListProducts();
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: getAdminListProductsQueryKey() });
 
-  const createMutation = useCreateProduct({ mutation: {
-    onSuccess: () => { invalidate(); setDrawerProduct(null); showToast("Product created"); },
-    onError: () => showToast("Failed to save product", "error"),
-  }});
+  const createMutation = useCreateProduct({
+    mutation: {
+      onSuccess: () => { invalidate(); setDrawerProduct(null); showToast("Product created (Draft)"); },
+      onError: () => showToast("Failed to save product", "error"),
+    },
+  });
 
-  const updateMutation = useUpdateProduct({ mutation: {
-    onSuccess: () => { invalidate(); setDrawerProduct(null); showToast("Product updated"); },
-    onError: () => showToast("Failed to update product", "error"),
-  }});
+  const updateMutation = useUpdateProduct({
+    mutation: {
+      onSuccess: () => { invalidate(); setDrawerProduct(null); showToast("Product updated"); },
+      onError: () => showToast("Failed to update product", "error"),
+    },
+  });
 
-  const deleteMutation = useDeleteProduct({ mutation: {
-    onSuccess: () => { invalidate(); setDeleteTarget(null); showToast("Product deleted"); },
-    onError: () => showToast("Failed to delete product", "error"),
-  }});
+  const lifecycleMutation = useUpdateProductLifecycle({
+    mutation: {
+      onSuccess: (_data, vars) => {
+        invalidate();
+        const stateLabel = (vars.data as { state: string }).state;
+        showToast(`Product ${stateLabel}`);
+      },
+      onError: () => showToast("Failed to update state", "error"),
+    },
+  });
+
+  const deleteMutation = useDeleteProduct({
+    mutation: {
+      onSuccess: () => { invalidate(); setDeleteTarget(null); showToast("Product deleted"); },
+      onError: () => showToast("Failed to delete product", "error"),
+    },
+  });
 
   const handleSave = (data: ProductInput) => {
     if (drawerProduct === "new") createMutation.mutate({ data });
     else if (drawerProduct) updateMutation.mutate({ id: drawerProduct.id, data });
   };
+
+  const handleLifecycle = (product: ApiProduct, state: "draft" | "published" | "archived") => {
+    lifecycleMutation.mutate({ id: product.id, data: { state } });
+  };
+
+  const publishedCount = products.filter((p) => p.publishedState === "published").length;
+  const draftCount = products.filter((p) => p.publishedState === "draft").length;
+  const archivedCount = products.filter((p) => p.publishedState === "archived").length;
 
   return (
     <div className="min-h-screen pt-8 pb-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
@@ -592,17 +743,22 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           </div>
           <p className="text-muted-foreground text-sm">Manage your SAH Ecosystem products</p>
         </div>
-        <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 text-muted-foreground text-sm hover:text-foreground hover:border-white/20 transition-colors">
-          <Lock size={14} />
+        <button
+          onClick={onLogout}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 text-muted-foreground text-sm hover:text-foreground hover:border-white/20 transition-colors"
+        >
+          <LogOut size={14} />
           Logout
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-4 mb-8">
         {[
-          { value: products.length, label: "Total Products", color: "text-primary" },
-          { value: products.filter((p) => p.status === "Active").length, label: "Active", color: "text-emerald-400" },
-          { value: products.filter((p) => p.status === "Beta").length, label: "Beta", color: "text-amber-400" },
+          { value: products.length, label: "Total", color: "text-primary" },
+          { value: publishedCount, label: "Published", color: "text-emerald-400" },
+          { value: draftCount, label: "Draft", color: "text-zinc-400" },
+          { value: archivedCount, label: "Archived", color: "text-red-400" },
         ].map((s) => (
           <div key={s.label} className="rounded-2xl bg-card/60 border border-white/8 p-4 text-center">
             <div className={`text-3xl font-black mb-1 ${s.color}`}>{s.value}</div>
@@ -611,9 +767,10 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         ))}
       </div>
 
+      {/* Products table */}
       <div className="rounded-2xl bg-card/50 backdrop-blur-sm border border-white/8 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/8">
-          <h2 className="text-base font-semibold text-foreground">Products</h2>
+          <h2 className="text-base font-semibold text-foreground">All Products</h2>
           <button
             onClick={() => setDrawerProduct("new")}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-all"
@@ -640,6 +797,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           <div className="divide-y divide-white/5">
             {products.map((product, index) => {
               const logoSrc = storageUrl(product.logoUrl);
+              const lc = lifecycleBadge[product.publishedState] ?? lifecycleBadge.draft;
               return (
                 <motion.div
                   key={product.id}
@@ -647,33 +805,71 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                   transition={{ delay: index * 0.04 }}
                   className="flex items-center gap-4 px-6 py-4 hover:bg-white/3 transition-colors group"
                 >
+                  {/* Logo */}
                   <div className={`w-10 h-10 rounded-xl ${logoSrc ? "bg-card/60 border border-white/10" : product.accentColor} flex items-center justify-center text-white font-black text-base flex-shrink-0 overflow-hidden`}>
                     {logoSrc ? <img src={logoSrc} alt={product.name} className="w-full h-full object-cover" /> : product.name.charAt(0)}
                   </div>
+
+                  {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                       <span className="text-foreground font-semibold text-sm truncate">{product.name}</span>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full border flex-shrink-0 ${statusColor[product.status] || statusColor["Active"]}`}>
+                      {/* Release status (Active/Beta) */}
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full border flex-shrink-0 ${statusColor[product.status] ?? statusColor["Active"]}`}>
                         {product.status}
+                      </span>
+                      {/* Lifecycle state */}
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full border flex-shrink-0 ${lc.cls}`}>
+                        {lc.label}
                       </span>
                     </div>
                     <p className="text-muted-foreground text-xs truncate">{product.category} · {product.version}</p>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                    <button onClick={() => setDrawerProduct(product)} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/8 transition-colors" aria-label="Edit">
-                      <Pencil size={14} />
-                    </button>
-                    <button onClick={() => setDeleteTarget(product)} className="p-2 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors" aria-label="Delete">
-                      <Trash2 size={14} />
-                    </button>
+
+                  {/* Actions — visible on hover */}
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                    {/* Lifecycle buttons */}
+                    <LifecycleActions
+                      product={product}
+                      onAction={(state) => handleLifecycle(product, state)}
+                      isPending={lifecycleMutation.isPending}
+                    />
+
+                    {/* Sort */}
                     <div className="flex flex-col">
-                      <button onClick={() => updateMutation.mutate({ id: product.id, data: { sortOrder: product.sortOrder - 1 } })} className="p-0.5 text-muted-foreground hover:text-foreground transition-colors" aria-label="Move up">
+                      <button
+                        onClick={() => updateMutation.mutate({ id: product.id, data: { sortOrder: product.sortOrder - 1 } })}
+                        className="p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label="Move up"
+                      >
                         <ChevronUp size={12} />
                       </button>
-                      <button onClick={() => updateMutation.mutate({ id: product.id, data: { sortOrder: product.sortOrder + 1 } })} className="p-0.5 text-muted-foreground hover:text-foreground transition-colors" aria-label="Move down">
+                      <button
+                        onClick={() => updateMutation.mutate({ id: product.id, data: { sortOrder: product.sortOrder + 1 } })}
+                        className="p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label="Move down"
+                      >
                         <ChevronDown size={12} />
                       </button>
                     </div>
+
+                    {/* Edit */}
+                    <button
+                      onClick={() => setDrawerProduct(product)}
+                      className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/8 transition-colors"
+                      aria-label="Edit"
+                    >
+                      <Pencil size={14} />
+                    </button>
+
+                    {/* Delete */}
+                    <button
+                      onClick={() => setDeleteTarget(product)}
+                      className="p-2 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                      aria-label="Delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </motion.div>
               );
@@ -682,6 +878,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         )}
       </div>
 
+      {/* Drawer */}
       <AnimatePresence>
         {drawerProduct !== null && (
           <ProductFormDrawer
@@ -693,6 +890,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         )}
       </AnimatePresence>
 
+      {/* Delete confirm */}
       <AnimatePresence>
         {deleteTarget && (
           <DeleteConfirm
@@ -707,10 +905,26 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// AdminPage — top-level auth gate
+// ---------------------------------------------------------------------------
 export default function AdminPage() {
   const [authed, setAuthed] = useState<boolean | null>(null);
-  useEffect(() => { setAuthed(sessionStorage.getItem(SESSION_KEY) === "1"); }, []);
-  const handleLogout = () => { sessionStorage.removeItem(SESSION_KEY); setAuthed(false); };
+
+  useEffect(() => {
+    const token = sessionStorage.getItem(SESSION_KEY);
+    setAuthed(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem(SESSION_KEY);
+    setAuthTokenGetter(getStoredToken);
+    setAuthed(false);
+  };
+
   if (authed === null) return null;
-  return authed ? <AdminDashboard onLogout={handleLogout} /> : <LoginScreen onSuccess={() => setAuthed(true)} />;
+
+  return authed
+    ? <AdminDashboard onLogout={handleLogout} />
+    : <LoginScreen onSuccess={() => setAuthed(true)} />;
 }

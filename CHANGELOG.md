@@ -6,6 +6,48 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.0.0] — 2026-06-01
+
+### Security
+
+- Removed hardcoded client-side password (`sah-admin-2024`)
+- Implemented server-side JWT authentication (`POST /api/auth/login`)
+- Admin credentials now stored as Replit Secrets (`ADMIN_USERNAME`, `ADMIN_PASSWORD`)
+- All mutating routes (`POST`, `PUT`, `PATCH`, `DELETE`) protected by `requireAuth` middleware
+- Storage upload endpoint also auth-protected
+- `crypto.timingSafeEqual` used for credential comparison (timing-safe)
+- JWT signed with `SESSION_SECRET`, 8h expiry
+
+### Added
+
+- `POST /api/auth/login` — returns signed JWT on valid credentials
+- `GET /api/auth/verify` — validates current bearer token
+- `GET /api/admin/products` — lists all products regardless of lifecycle state (admin only)
+- `PATCH /api/products/:id/lifecycle` — changes product state (draft / published / archived)
+- `publishedState` column on `products` table (default `published` for existing rows)
+- Admin login form: username + password (server-side validation)
+- Lifecycle action buttons in admin panel: Publish, Unpublish, Archive, Restore
+- State badge per product row (Draft / Published / Archived)
+- Stats bar shows: Total · Published · Draft · Archived counts
+- `artifacts/api-server/src/lib/auth.ts` — JWT sign/verify logic
+- `artifacts/api-server/src/middleware/requireAuth.ts` — Bearer token middleware
+- `artifacts/api-server/src/routes/auth.ts` — Auth endpoints
+
+### Changed
+
+- `GET /api/products` now returns only `published` products (public filtering)
+- New products created via admin default to `draft` state
+- Admin dashboard uses `useAdminListProducts` hook (sees all states)
+- `setAuthTokenGetter` wired at app startup to inject JWT into all generated hooks
+- Stats bar updated: 4 counters (Total, Published, Draft, Archived) instead of 3
+- `RELEASE.md` updated to v2.0.0
+
+### Dependencies
+
+- `jsonwebtoken` added to `@workspace/api-server`
+
+---
+
 ## [1.0.0] — 2026-05-30
 
 ### Initial Production Release
