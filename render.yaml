@@ -1,0 +1,134 @@
+# SAH Ecosystem — Render Blueprint
+# https://render.com/docs/blueprint-spec
+#
+# BEFORE YOU DEPLOY — READ THIS:
+#
+# Step 1: Deploy the API service first.
+#         After it is live, copy its URL (e.g. https://sah-api.onrender.com).
+#
+# Step 2: Replace the placeholder URL below:
+#         Search for "REPLACE_WITH_API_URL" and replace with your actual API URL.
+#
+# Step 3: Push this updated render.yaml to GitHub, then connect the repo
+#         to Render — it will pick up this blueprint automatically.
+#
+# Step 4: Fill in the environment variables that are marked `sync: false`
+#         (ADMIN_USERNAME, ADMIN_PASSWORD, and storage vars) in the Render dashboard.
+#
+# STORAGE NOTE:
+#   Image uploads (logo, screenshots) use Replit-specific internal auth and will
+#   NOT work on Render without a one-time code change to objectStorage.ts.
+#   All other features (products, admin login, lifecycle, public site) work as-is.
+#   See RENDER_DEPLOYMENT_GUIDE.md — Section 7 for the fix.
+
+databases:
+  - name: sah-db
+    databaseName: sah_ecosystem
+    user: sah_user
+    plan: free
+    region: oregon
+
+services:
+  # ─── API Server (Express 5 / Node.js) ────────────────────────────────────
+  - type: web
+    name: sah-api
+    runtime: node
+    plan: free
+    region: oregon
+
+    # Install pnpm, install all workspace deps, push DB schema, build API
+    buildCommand: |
+      npm install -g pnpm@10 &&
+      pnpm install --frozen-lockfile &&
+      pnpm run typecheck:libs &&
+      DATABASE_URL=$DATABASE_URL pnpm --filter @workspace/db run push-force &&
+      pnpm --filter @workspace/api-server run build
+
+    # Start the compiled ESM bundle — Render auto-injects PORT
+    startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
+
+    # Render auto-injects PORT; we confirm the server is alive via /api/healthz
+    healthCheckPath: /api/healthz
+
+    autoDeploy: true
+
+    envVars:
+      # ── Node environment ──────────────────────────────────────────────────
+      - key: NODE_ENV
+        value: production
+
+      - key: NODE_VERSION
+        value: 24.13.0
+
+      # ── Auth ──────────────────────────────────────────────────────────────
+      # SESSION_SECRET: auto-generated strong random value by Render
+      - key: SESSION_SECRET
+        generateValue: true
+
+      # ADMIN_USERNAME / ADMIN_PASSWORD: set manually in Render dashboard
+      - key: ADMIN_USERNAME
+        sync: false
+
+      - key: ADMIN_PASSWORD
+        sync: false
+
+      # ── Database ──────────────────────────────────────────────────────────
+      # DATABASE_URL is injected automatically from the sah-db database above
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sah-db
+          property: connectionString
+
+      # ── Object Storage (Replit-specific — must be replaced for Render) ────
+      # These are required by the current code but will not work as-is on Render.
+      # Set them to placeholder values now; they only affect image upload/serve.
+      # See RENDER_DEPLOYMENT_GUIDE.md Section 7 for the storage migration steps.
+      - key: DEFAULT_OBJECT_STORAGE_BUCKET_ID
+        sync: false
+
+      - key: PRIVATE_OBJECT_DIR
+        sync: false
+
+      - key: PUBLIC_OBJECT_SEARCH_PATHS
+        sync: false
+
+  # ─── Frontend (React + Vite → Static Site) ───────────────────────────────
+  - type: web
+    name: sah-frontend
+    runtime: static
+    plan: free
+    region: oregon
+
+    # Vite requires PORT and BASE_PATH at build time (vite.config.ts enforces this)
+    buildCommand: |
+      npm install -g pnpm@10 &&
+      pnpm install --frozen-lockfile &&
+      PORT=3000 BASE_PATH=/ pnpm --filter @workspace/smart-agent-hub run build
+
+    # Vite outputs to dist/public (configured in vite.config.ts outDir)
+    staticPublishPath: artifacts/smart-agent-hub/dist/public
+
+    autoDeploy: true
+
+    routes:
+      # Proxy /api/* to the API service.
+      # REPLACE_WITH_API_URL → your actual API service URL, e.g.:
+      #   https://sah-api.onrender.com
+      - type: rewrite
+        source: /api/*
+        destination: REPLACE_WITH_API_URL/api/*
+
+      # SPA fallback — all other paths serve index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+    headers:
+      # Immutable cache for hashed Vite assets (JS/CSS bundles)
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      # No cache for index.html and root files
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
