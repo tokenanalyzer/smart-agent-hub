@@ -3,14 +3,22 @@
  * Do not edit manually.
  * Api
  * API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export * from './apiProduct';
+export * from './apiProductPublishedState';
 export * from './deletedResponse';
 export * from './errorResponse';
 export * from './healthStatus';
+export * from './lifecycleUpdate';
+export * from './lifecycleUpdateState';
+export * from './loginBody';
+export * from './loginResponse';
 export * from './productInput';
+export * from './productInputPublishedState';
 export * from './productUpdate';
+export * from './productUpdatePublishedState';
 export * from './requestUploadUrlBody';
 export * from './requestUploadUrlResponse';
+export * from './verifyResponse';

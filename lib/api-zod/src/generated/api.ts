@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import * as zod from 'zod';
 
@@ -18,7 +18,28 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
- * @summary List all products
+ * @summary Admin login
+ */
+export const AdminLoginBody = zod.object({
+  "username": zod.string(),
+  "password": zod.string()
+})
+
+export const AdminLoginResponse = zod.object({
+  "token": zod.string()
+})
+
+
+/**
+ * @summary Verify JWT token validity
+ */
+export const VerifyAuthResponse = zod.object({
+  "valid": zod.boolean()
+})
+
+
+/**
+ * @summary List published products (public)
  */
 export const ListProductsResponseItem = zod.object({
   "id": zod.number(),
@@ -39,13 +60,14 @@ export const ListProductsResponseItem = zod.object({
   "screenshot3Url": zod.string().nullish(),
   "screenshot4Url": zod.string().nullish(),
   "accentColor": zod.string(),
+  "publishedState": zod.enum(['draft', 'published', 'archived']),
   "sortOrder": zod.number()
 })
 export const ListProductsResponse = zod.array(ListProductsResponseItem)
 
 
 /**
- * @summary Create a product
+ * @summary Create a product (admin)
  */
 
 
@@ -72,8 +94,37 @@ export const CreateProductBody = zod.object({
   "screenshot3Url": zod.string().nullish(),
   "screenshot4Url": zod.string().nullish(),
   "accentColor": zod.string(),
+  "publishedState": zod.enum(['draft', 'published', 'archived']).optional(),
   "sortOrder": zod.number()
 })
+
+
+/**
+ * @summary List all products regardless of state (admin)
+ */
+export const AdminListProductsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "category": zod.string(),
+  "tagline": zod.string(),
+  "description": zod.string(),
+  "version": zod.string(),
+  "status": zod.string(),
+  "features": zod.array(zod.string()),
+  "logoUrl": zod.string().nullish(),
+  "websiteUrl": zod.string().nullish(),
+  "apkUrl": zod.string().nullish(),
+  "githubUrl": zod.string().nullish(),
+  "telegramUrl": zod.string().nullish(),
+  "screenshot1Url": zod.string().nullish(),
+  "screenshot2Url": zod.string().nullish(),
+  "screenshot3Url": zod.string().nullish(),
+  "screenshot4Url": zod.string().nullish(),
+  "accentColor": zod.string(),
+  "publishedState": zod.enum(['draft', 'published', 'archived']),
+  "sortOrder": zod.number()
+})
+export const AdminListProductsResponse = zod.array(AdminListProductsResponseItem)
 
 
 /**
@@ -102,12 +153,13 @@ export const GetProductResponse = zod.object({
   "screenshot3Url": zod.string().nullish(),
   "screenshot4Url": zod.string().nullish(),
   "accentColor": zod.string(),
+  "publishedState": zod.enum(['draft', 'published', 'archived']),
   "sortOrder": zod.number()
 })
 
 
 /**
- * @summary Update a product
+ * @summary Update a product (admin)
  */
 export const UpdateProductParams = zod.object({
   "id": zod.coerce.number()
@@ -138,6 +190,7 @@ export const UpdateProductBody = zod.object({
   "screenshot3Url": zod.string().nullish(),
   "screenshot4Url": zod.string().nullish(),
   "accentColor": zod.string().optional(),
+  "publishedState": zod.enum(['draft', 'published', 'archived']).optional(),
   "sortOrder": zod.number().optional()
 })
 
@@ -160,12 +213,13 @@ export const UpdateProductResponse = zod.object({
   "screenshot3Url": zod.string().nullish(),
   "screenshot4Url": zod.string().nullish(),
   "accentColor": zod.string(),
+  "publishedState": zod.enum(['draft', 'published', 'archived']),
   "sortOrder": zod.number()
 })
 
 
 /**
- * @summary Delete a product
+ * @summary Delete a product (admin)
  */
 export const DeleteProductParams = zod.object({
   "id": zod.coerce.number()
@@ -177,7 +231,42 @@ export const DeleteProductResponse = zod.object({
 
 
 /**
- * @summary Request a presigned upload URL
+ * @summary Update product lifecycle state (admin)
+ */
+export const UpdateProductLifecycleParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateProductLifecycleBody = zod.object({
+  "state": zod.enum(['draft', 'published', 'archived'])
+})
+
+export const UpdateProductLifecycleResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "category": zod.string(),
+  "tagline": zod.string(),
+  "description": zod.string(),
+  "version": zod.string(),
+  "status": zod.string(),
+  "features": zod.array(zod.string()),
+  "logoUrl": zod.string().nullish(),
+  "websiteUrl": zod.string().nullish(),
+  "apkUrl": zod.string().nullish(),
+  "githubUrl": zod.string().nullish(),
+  "telegramUrl": zod.string().nullish(),
+  "screenshot1Url": zod.string().nullish(),
+  "screenshot2Url": zod.string().nullish(),
+  "screenshot3Url": zod.string().nullish(),
+  "screenshot4Url": zod.string().nullish(),
+  "accentColor": zod.string(),
+  "publishedState": zod.enum(['draft', 'published', 'archived']),
+  "sortOrder": zod.number()
+})
+
+
+/**
+ * @summary Request a presigned upload URL (admin)
  */
 export const RequestUploadUrlBody = zod.object({
   "name": zod.string(),

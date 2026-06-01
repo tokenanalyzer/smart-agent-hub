@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import {
   useMutation,
@@ -24,10 +24,14 @@ import type {
   DeletedResponse,
   ErrorResponse,
   HealthStatus,
+  LifecycleUpdate,
+  LoginBody,
+  LoginResponse,
   ProductInput,
   ProductUpdate,
   RequestUploadUrlBody,
-  RequestUploadUrlResponse
+  RequestUploadUrlResponse,
+  VerifyResponse
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -120,6 +124,154 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
+export const getAdminLoginUrl = () => {
+
+
+
+
+  return `/api/auth/login`
+}
+
+/**
+ * @summary Admin login
+ */
+export const adminLogin = async (loginBody: LoginBody, options?: RequestInit): Promise<LoginResponse> => {
+
+  return customFetch<LoginResponse>(getAdminLoginUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      loginBody,)
+  }
+);}
+
+
+
+
+export const getAdminLoginMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminLogin>>, TError,{data: BodyType<LoginBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminLogin>>, TError,{data: BodyType<LoginBody>}, TContext> => {
+
+const mutationKey = ['adminLogin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminLogin>>, {data: BodyType<LoginBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminLogin(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminLoginMutationResult = NonNullable<Awaited<ReturnType<typeof adminLogin>>>
+    export type AdminLoginMutationBody = BodyType<LoginBody>
+    export type AdminLoginMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Admin login
+ */
+export const useAdminLogin = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminLogin>>, TError,{data: BodyType<LoginBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminLogin>>,
+        TError,
+        {data: BodyType<LoginBody>},
+        TContext
+      > => {
+      return useMutation(getAdminLoginMutationOptions(options));
+    }
+
+export const getVerifyAuthUrl = () => {
+
+
+
+
+  return `/api/auth/verify`
+}
+
+/**
+ * @summary Verify JWT token validity
+ */
+export const verifyAuth = async ( options?: RequestInit): Promise<VerifyResponse> => {
+
+  return customFetch<VerifyResponse>(getVerifyAuthUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getVerifyAuthQueryKey = () => {
+    return [
+    `/api/auth/verify`
+    ] as const;
+    }
+
+
+export const getVerifyAuthQueryOptions = <TData = Awaited<ReturnType<typeof verifyAuth>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof verifyAuth>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getVerifyAuthQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof verifyAuth>>> = ({ signal }) => verifyAuth({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof verifyAuth>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type VerifyAuthQueryResult = NonNullable<Awaited<ReturnType<typeof verifyAuth>>>
+export type VerifyAuthQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Verify JWT token validity
+ */
+
+export function useVerifyAuth<TData = Awaited<ReturnType<typeof verifyAuth>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof verifyAuth>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getVerifyAuthQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
 export const getListProductsUrl = () => {
 
 
@@ -129,7 +281,7 @@ export const getListProductsUrl = () => {
 }
 
 /**
- * @summary List all products
+ * @summary List published products (public)
  */
 export const listProducts = async ( options?: RequestInit): Promise<ApiProduct[]> => {
 
@@ -176,7 +328,7 @@ export type ListProductsQueryError = ErrorType<unknown>
 
 
 /**
- * @summary List all products
+ * @summary List published products (public)
  */
 
 export function useListProducts<TData = Awaited<ReturnType<typeof listProducts>>, TError = ErrorType<unknown>>(
@@ -206,7 +358,7 @@ export const getCreateProductUrl = () => {
 }
 
 /**
- * @summary Create a product
+ * @summary Create a product (admin)
  */
 export const createProduct = async (productInput: ProductInput, options?: RequestInit): Promise<ApiProduct> => {
 
@@ -255,7 +407,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type CreateProductMutationError = ErrorType<ErrorResponse>
 
     /**
- * @summary Create a product
+ * @summary Create a product (admin)
  */
 export const useCreateProduct = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProduct>>, TError,{data: BodyType<ProductInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -267,6 +419,83 @@ export const useCreateProduct = <TError = ErrorType<ErrorResponse>,
       > => {
       return useMutation(getCreateProductMutationOptions(options));
     }
+
+export const getAdminListProductsUrl = () => {
+
+
+
+
+  return `/api/admin/products`
+}
+
+/**
+ * @summary List all products regardless of state (admin)
+ */
+export const adminListProducts = async ( options?: RequestInit): Promise<ApiProduct[]> => {
+
+  return customFetch<ApiProduct[]>(getAdminListProductsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListProductsQueryKey = () => {
+    return [
+    `/api/admin/products`
+    ] as const;
+    }
+
+
+export const getAdminListProductsQueryOptions = <TData = Awaited<ReturnType<typeof adminListProducts>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListProducts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListProductsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListProducts>>> = ({ signal }) => adminListProducts({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListProducts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminListProductsQueryResult = NonNullable<Awaited<ReturnType<typeof adminListProducts>>>
+export type AdminListProductsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List all products regardless of state (admin)
+ */
+
+export function useAdminListProducts<TData = Awaited<ReturnType<typeof adminListProducts>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListProducts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminListProductsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export const getGetProductUrl = (id: number,) => {
 
@@ -354,7 +583,7 @@ export const getUpdateProductUrl = (id: number,) => {
 }
 
 /**
- * @summary Update a product
+ * @summary Update a product (admin)
  */
 export const updateProduct = async (id: number,
     productUpdate: ProductUpdate, options?: RequestInit): Promise<ApiProduct> => {
@@ -404,7 +633,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UpdateProductMutationError = ErrorType<ErrorResponse>
 
     /**
- * @summary Update a product
+ * @summary Update a product (admin)
  */
 export const useUpdateProduct = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProduct>>, TError,{id: number;data: BodyType<ProductUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -426,7 +655,7 @@ export const getDeleteProductUrl = (id: number,) => {
 }
 
 /**
- * @summary Delete a product
+ * @summary Delete a product (admin)
  */
 export const deleteProduct = async (id: number, options?: RequestInit): Promise<DeletedResponse> => {
 
@@ -474,7 +703,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type DeleteProductMutationError = ErrorType<ErrorResponse>
 
     /**
- * @summary Delete a product
+ * @summary Delete a product (admin)
  */
 export const useDeleteProduct = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProduct>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -487,6 +716,78 @@ export const useDeleteProduct = <TError = ErrorType<ErrorResponse>,
       return useMutation(getDeleteProductMutationOptions(options));
     }
 
+export const getUpdateProductLifecycleUrl = (id: number,) => {
+
+
+
+
+  return `/api/products/${id}/lifecycle`
+}
+
+/**
+ * @summary Update product lifecycle state (admin)
+ */
+export const updateProductLifecycle = async (id: number,
+    lifecycleUpdate: LifecycleUpdate, options?: RequestInit): Promise<ApiProduct> => {
+
+  return customFetch<ApiProduct>(getUpdateProductLifecycleUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      lifecycleUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateProductLifecycleMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProductLifecycle>>, TError,{id: number;data: BodyType<LifecycleUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateProductLifecycle>>, TError,{id: number;data: BodyType<LifecycleUpdate>}, TContext> => {
+
+const mutationKey = ['updateProductLifecycle'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateProductLifecycle>>, {id: number;data: BodyType<LifecycleUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateProductLifecycle(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateProductLifecycleMutationResult = NonNullable<Awaited<ReturnType<typeof updateProductLifecycle>>>
+    export type UpdateProductLifecycleMutationBody = BodyType<LifecycleUpdate>
+    export type UpdateProductLifecycleMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Update product lifecycle state (admin)
+ */
+export const useUpdateProductLifecycle = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProductLifecycle>>, TError,{id: number;data: BodyType<LifecycleUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateProductLifecycle>>,
+        TError,
+        {id: number;data: BodyType<LifecycleUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateProductLifecycleMutationOptions(options));
+    }
+
 export const getRequestUploadUrlUrl = () => {
 
 
@@ -496,7 +797,7 @@ export const getRequestUploadUrlUrl = () => {
 }
 
 /**
- * @summary Request a presigned upload URL
+ * @summary Request a presigned upload URL (admin)
  */
 export const requestUploadUrl = async (requestUploadUrlBody: RequestUploadUrlBody, options?: RequestInit): Promise<RequestUploadUrlResponse> => {
 
@@ -545,7 +846,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type RequestUploadUrlMutationError = ErrorType<ErrorResponse>
 
     /**
- * @summary Request a presigned upload URL
+ * @summary Request a presigned upload URL (admin)
  */
 export const useRequestUploadUrl = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,{data: BodyType<RequestUploadUrlBody>}, TContext>, request?: SecondParameter<typeof customFetch>}

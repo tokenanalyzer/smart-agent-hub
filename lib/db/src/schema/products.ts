@@ -21,6 +21,7 @@ export const productsTable = pgTable("products", {
   screenshot3Url: text("screenshot3_url"),
   screenshot4Url: text("screenshot4_url"),
   accentColor: text("accent_color").notNull().default("bg-violet-600"),
+  publishedState: text("published_state").notNull().default("published"),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),

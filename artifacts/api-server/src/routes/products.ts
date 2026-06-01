@@ -6,23 +6,30 @@ import {
   CreateProductBody,
   UpdateProductBody,
 } from "@workspace/api-zod";
+import { requireAuth } from "../middleware/requireAuth";
 
 const router: IRouter = Router();
+
+const VALID_LIFECYCLE_STATES = ["draft", "published", "archived"] as const;
+type LifecycleState = (typeof VALID_LIFECYCLE_STATES)[number];
+
+function normalizeProduct(r: typeof productsTable.$inferSelect) {
+  return {
+    ...r,
+    websiteUrl: r.websiteUrl ?? null,
+    apkUrl: r.apkUrl ?? null,
+    githubUrl: r.githubUrl ?? null,
+  };
+}
 
 router.get("/products", async (req: Request, res: Response) => {
   try {
     const rows = await db
       .select()
       .from(productsTable)
+      .where(eq(productsTable.publishedState, "published"))
       .orderBy(productsTable.sortOrder, productsTable.id);
-    const data = ListProductsResponse.parse(
-      rows.map((r) => ({
-        ...r,
-        websiteUrl: r.websiteUrl ?? null,
-        apkUrl: r.apkUrl ?? null,
-        githubUrl: r.githubUrl ?? null,
-      }))
-    );
+    const data = ListProductsResponse.parse(rows.map(normalizeProduct));
     res.json(data);
   } catch (err) {
     req.log.error({ err }, "listProducts failed");
@@ -30,21 +37,32 @@ router.get("/products", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/products", async (req: Request, res: Response) => {
+router.get("/admin/products", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const rows = await db
+      .select()
+      .from(productsTable)
+      .orderBy(productsTable.sortOrder, productsTable.id);
+    res.json(rows.map(normalizeProduct));
+  } catch (err) {
+    req.log.error({ err }, "adminListProducts failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/products", requireAuth, async (req: Request, res: Response) => {
   const parsed = CreateProductBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
   try {
-    const insertData = insertProductSchema.parse(parsed.data);
-    const [row] = await db.insert(productsTable).values(insertData).returning();
-    res.status(201).json({
-      ...row,
-      websiteUrl: row.websiteUrl ?? null,
-      apkUrl: row.apkUrl ?? null,
-      githubUrl: row.githubUrl ?? null,
+    const insertData = insertProductSchema.parse({
+      ...parsed.data,
+      publishedState: parsed.data.publishedState ?? "draft",
     });
+    const [row] = await db.insert(productsTable).values(insertData).returning();
+    res.status(201).json(normalizeProduct(row));
   } catch (err) {
     req.log.error({ err }, "createProduct failed");
     res.status(500).json({ error: "Internal server error" });
@@ -66,19 +84,14 @@ router.get("/products/:id", async (req: Request, res: Response) => {
       res.status(404).json({ error: "Product not found" });
       return;
     }
-    res.json({
-      ...row,
-      websiteUrl: row.websiteUrl ?? null,
-      apkUrl: row.apkUrl ?? null,
-      githubUrl: row.githubUrl ?? null,
-    });
+    res.json(normalizeProduct(row));
   } catch (err) {
     req.log.error({ err }, "getProduct failed");
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.put("/products/:id", async (req: Request, res: Response) => {
+router.put("/products/:id", requireAuth, async (req: Request, res: Response) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     res.status(404).json({ error: "Product not found" });
@@ -103,19 +116,47 @@ router.put("/products/:id", async (req: Request, res: Response) => {
       .set(parsed.data)
       .where(eq(productsTable.id, id))
       .returning();
-    res.json({
-      ...row,
-      websiteUrl: row.websiteUrl ?? null,
-      apkUrl: row.apkUrl ?? null,
-      githubUrl: row.githubUrl ?? null,
-    });
+    res.json(normalizeProduct(row));
   } catch (err) {
     req.log.error({ err }, "updateProduct failed");
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.delete("/products/:id", async (req: Request, res: Response) => {
+router.patch("/products/:id/lifecycle", requireAuth, async (req: Request, res: Response) => {
+  const id = parseInt(String(req.params.id), 10);
+  if (isNaN(id)) {
+    res.status(404).json({ error: "Product not found" });
+    return;
+  }
+  const { state } = req.body ?? {};
+  if (!VALID_LIFECYCLE_STATES.includes(state as LifecycleState)) {
+    res.status(400).json({ error: `state must be one of: ${VALID_LIFECYCLE_STATES.join(", ")}` });
+    return;
+  }
+  try {
+    const [existing] = await db
+      .select()
+      .from(productsTable)
+      .where(eq(productsTable.id, id));
+    if (!existing) {
+      res.status(404).json({ error: "Product not found" });
+      return;
+    }
+    const [row] = await db
+      .update(productsTable)
+      .set({ publishedState: state as LifecycleState })
+      .where(eq(productsTable.id, id))
+      .returning();
+    req.log.info({ id, state }, "Product lifecycle updated");
+    res.json(normalizeProduct(row));
+  } catch (err) {
+    req.log.error({ err }, "updateProductLifecycle failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.delete("/products/:id", requireAuth, async (req: Request, res: Response) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) {
     res.status(404).json({ error: "Product not found" });

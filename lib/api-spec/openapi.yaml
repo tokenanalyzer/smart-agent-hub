@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
+  version: 0.2.0
   description: API specification
 servers:
   - url: /api
@@ -10,172 +10,20 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Admin authentication
   - name: products
     description: Product management
   - name: storage
     description: Object storage
-paths:
-  /healthz:
-    get:
-      operationId: healthCheck
-      tags: [health]
-      summary: Health check
-      description: Returns server health status
-      responses:
-        "200":
-          description: Healthy
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HealthStatus"
-
-  /products:
-    get:
-      operationId: listProducts
-      tags: [products]
-      summary: List all products
-      responses:
-        "200":
-          description: List of products
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ApiProduct"
-    post:
-      operationId: createProduct
-      tags: [products]
-      summary: Create a product
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ProductInput"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiProduct"
-        "400":
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
-  /products/{id}:
-    get:
-      operationId: getProduct
-      tags: [products]
-      summary: Get a product by ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Product
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiProduct"
-        "404":
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-    put:
-      operationId: updateProduct
-      tags: [products]
-      summary: Update a product
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ProductUpdate"
-      responses:
-        "200":
-          description: Updated product
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiProduct"
-        "400":
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "404":
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-    delete:
-      operationId: deleteProduct
-      tags: [products]
-      summary: Delete a product
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Deleted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DeletedResponse"
-        "404":
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
-  /storage/uploads/request-url:
-    post:
-      operationId: requestUploadUrl
-      tags: [storage]
-      summary: Request a presigned upload URL
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RequestUploadUrlBody"
-      responses:
-        "200":
-          description: Presigned upload URL
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RequestUploadUrlResponse"
-        "400":
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     HealthStatus:
       type: object
@@ -184,6 +32,42 @@ components:
           type: string
       required:
         - status
+
+    LoginBody:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+        - token
+
+    VerifyResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+      required:
+        - valid
+
+    LifecycleUpdate:
+      type: object
+      properties:
+        state:
+          type: string
+          enum: [draft, published, archived]
+      required:
+        - state
 
     ApiProduct:
       type: object
@@ -226,6 +110,9 @@ components:
           type: ["string", "null"]
         accentColor:
           type: string
+        publishedState:
+          type: string
+          enum: [draft, published, archived]
         sortOrder:
           type: integer
       required:
@@ -238,6 +125,7 @@ components:
         - status
         - features
         - accentColor
+        - publishedState
         - sortOrder
 
     ProductInput:
@@ -284,6 +172,9 @@ components:
           type: ["string", "null"]
         accentColor:
           type: string
+        publishedState:
+          type: string
+          enum: [draft, published, archived]
         sortOrder:
           type: integer
       required:
@@ -341,6 +232,9 @@ components:
           type: ["string", "null"]
         accentColor:
           type: string
+        publishedState:
+          type: string
+          enum: [draft, published, archived]
         sortOrder:
           type: integer
 
@@ -384,3 +278,298 @@ components:
           type: boolean
       required:
         - success
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: adminLogin
+      tags: [auth]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: JWT token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Missing fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/verify:
+    get:
+      operationId: verifyAuth
+      tags: [auth]
+      summary: Verify JWT token validity
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyResponse"
+        "401":
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List published products (public)
+      responses:
+        "200":
+          description: Published products only
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiProduct"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product (admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Created (defaults to draft state)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProduct"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/products:
+    get:
+      operationId: adminListProducts
+      tags: [products]
+      summary: List all products regardless of state (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: All products (draft, published, archived)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiProduct"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProduct"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProduct"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeletedResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /products/{id}/lifecycle:
+    patch:
+      operationId: updateProductLifecycle
+      tags: [products]
+      summary: Update product lifecycle state (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LifecycleUpdate"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProduct"
+        "400":
+          description: Invalid state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a presigned upload URL (admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestUploadUrlBody"
+      responses:
+        "200":
+          description: Presigned upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestUploadUrlResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"

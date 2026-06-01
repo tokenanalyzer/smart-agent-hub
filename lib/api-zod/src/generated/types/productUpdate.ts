@@ -3,8 +3,9 @@
  * Do not edit manually.
  * Api
  * API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
+import type { ProductUpdatePublishedState } from './productUpdatePublishedState';
 
 export interface ProductUpdate {
   /** @minLength 1 */
@@ -38,5 +39,6 @@ export interface ProductUpdate {
   /** @nullable */
   screenshot4Url?: string | null;
   accentColor?: string;
+  publishedState?: ProductUpdatePublishedState;
   sortOrder?: number;
 }

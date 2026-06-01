@@ -3,11 +3,46 @@
  * Do not edit manually.
  * Api
  * API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 export interface HealthStatus {
   status: string;
 }
+
+export interface LoginBody {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+}
+
+export interface VerifyResponse {
+  valid: boolean;
+}
+
+export type LifecycleUpdateState = typeof LifecycleUpdateState[keyof typeof LifecycleUpdateState];
+
+
+export const LifecycleUpdateState = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export interface LifecycleUpdate {
+  state: LifecycleUpdateState;
+}
+
+export type ApiProductPublishedState = typeof ApiProductPublishedState[keyof typeof ApiProductPublishedState];
+
+
+export const ApiProductPublishedState = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived',
+} as const;
 
 export interface ApiProduct {
   id: number;
@@ -37,8 +72,18 @@ export interface ApiProduct {
   /** @nullable */
   screenshot4Url?: string | null;
   accentColor: string;
+  publishedState: ApiProductPublishedState;
   sortOrder: number;
 }
+
+export type ProductInputPublishedState = typeof ProductInputPublishedState[keyof typeof ProductInputPublishedState];
+
+
+export const ProductInputPublishedState = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived',
+} as const;
 
 export interface ProductInput {
   /** @minLength 1 */
@@ -72,8 +117,18 @@ export interface ProductInput {
   /** @nullable */
   screenshot4Url?: string | null;
   accentColor: string;
+  publishedState?: ProductInputPublishedState;
   sortOrder: number;
 }
+
+export type ProductUpdatePublishedState = typeof ProductUpdatePublishedState[keyof typeof ProductUpdatePublishedState];
+
+
+export const ProductUpdatePublishedState = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived',
+} as const;
 
 export interface ProductUpdate {
   /** @minLength 1 */
@@ -107,6 +162,7 @@ export interface ProductUpdate {
   /** @nullable */
   screenshot4Url?: string | null;
   accentColor?: string;
+  publishedState?: ProductUpdatePublishedState;
   sortOrder?: number;
 }
 
