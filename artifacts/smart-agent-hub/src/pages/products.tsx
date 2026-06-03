@@ -50,7 +50,8 @@ export default function ProductsPage() {
           placeholder="Search products..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 rounded-xl bg-card/60 backdrop-blur-sm border border-white/10 text-foreground placeholder:text-muted-foreground/60 text-sm focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15 transition-all"
+          className="w-full pl-11 pr-4 py-3 rounded-xl backdrop-blur-sm text-foreground placeholder:text-muted-foreground/60 text-sm focus:outline-none transition-all"
+        style={{ background: "rgba(245,200,66,0.04)", border: "1px solid rgba(245,200,66,0.15)" }}
           data-testid="input-search-products"
         />
       </motion.div>
@@ -68,9 +69,13 @@ export default function ProductsPage() {
             data-testid={`filter-${cat.toLowerCase().replace(/\s+/g, "-").replace(/[&]/g, "")}`}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               activeCategory === cat
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                : "bg-card/60 border border-white/8 text-muted-foreground hover:text-foreground hover:border-white/15"
+                ? "text-black font-semibold"
+                : "text-muted-foreground hover:text-amber-400"
             }`}
+            style={activeCategory === cat
+              ? { background: "linear-gradient(135deg, #f5c842, #e8a200)", boxShadow: "0 4px 15px rgba(245,200,66,0.25)" }
+              : { background: "rgba(245,200,66,0.04)", border: "1px solid rgba(245,200,66,0.12)" }
+            }
           >
             {cat}
           </button>
@@ -90,7 +95,7 @@ export default function ProductsPage() {
         </div>
       ) : (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-24">
-          <div className="w-14 h-14 rounded-2xl bg-card/60 border border-white/8 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "rgba(245,200,66,0.06)", border: "1px solid rgba(245,200,66,0.15)" }}>
             <Search size={20} className="text-muted-foreground" />
           </div>
           <p className="text-muted-foreground text-lg font-medium mb-2">No products found</p>

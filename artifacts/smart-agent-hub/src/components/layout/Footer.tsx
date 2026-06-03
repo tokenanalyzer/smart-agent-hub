@@ -14,13 +14,13 @@ export default function Footer() {
   const { data: products = [] } = useListProducts();
 
   return (
-    <footer className="border-t border-white/8 bg-background/60 backdrop-blur-sm mt-20">
+    <footer className="mt-20" style={{ borderTop: "1px solid rgba(245,200,66,0.12)", background: "rgba(10,10,10,0.8)", backdropFilter: "blur(12px)" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center">
-                <span className="text-primary font-black text-sm tracking-tight">SAH</span>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #f5c842, #c97c08)" }}>
+                <span className="text-black font-black text-xs tracking-tight" style={{ fontFamily: "'Cinzel', serif" }}>SAH</span>
               </div>
               <span className="text-foreground font-bold text-base">SAH Ecosystem</span>
             </div>
@@ -33,7 +33,8 @@ export default function Footer() {
                 href="https://github.com/tokenanalyzer"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-amber-400 transition-colors"
+                style={{ background: "rgba(245,200,66,0.05)", border: "1px solid rgba(245,200,66,0.12)" }}
                 aria-label="GitHub"
               >
                 <FaGithub size={15} />
@@ -42,7 +43,8 @@ export default function Footer() {
                 href="https://twitter.com/Husain3413"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-amber-400 transition-colors"
+                style={{ background: "rgba(245,200,66,0.05)", border: "1px solid rgba(245,200,66,0.12)" }}
                 aria-label="X / Twitter"
               >
                 <FaXTwitter size={15} />
@@ -51,7 +53,8 @@ export default function Footer() {
                 href="https://t.me/dil3413"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-amber-400 transition-colors"
+                style={{ background: "rgba(245,200,66,0.05)", border: "1px solid rgba(245,200,66,0.12)" }}
                 aria-label="Telegram"
               >
                 <FaTelegram size={15} />
@@ -60,7 +63,8 @@ export default function Footer() {
                 href="https://linkedin.com/in/adil-hussain"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-amber-400 transition-colors"
+                style={{ background: "rgba(245,200,66,0.05)", border: "1px solid rgba(245,200,66,0.12)" }}
                 aria-label="LinkedIn"
               >
                 <FaLinkedin size={15} />
@@ -137,7 +141,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-white/8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderTop: "1px solid rgba(245,200,66,0.1)" }}>
           <p className="text-muted-foreground text-sm">
             &copy; 2026 SAH Ecosystem. Built by Adil Husain. All rights reserved.
           </p>

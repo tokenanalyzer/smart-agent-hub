@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@700;900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -51,56 +51,56 @@
 }
 
 :root {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
+  --button-outline: rgba(212,175,55, .15);
+  --badge-outline: rgba(212,175,55, .08);
 
   --opaque-button-border-intensity: -8;
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
+  --elevate-1: rgba(212,175,55, .04);
+  --elevate-2: rgba(212,175,55, .08);
 
-  /* Dark Theme Palette (Default & Permanent) */
-  /* Background: #09090b -> hsl(240 5.9% 4%) */
-  --background: 240 5.9% 4%;
-  --foreground: 240 4.8% 95.9%;
-  
-  /* Card/Surface: #1a1a2e -> hsl(240 28% 14%) */
-  --card: 240 28% 14%;
-  --card-foreground: 240 4.8% 95.9%;
-  --card-border: 0 0% 100% / 0.08;
+  /* ── Black & Gold Luxury Theme ── */
+  /* Background: true black */
+  --background: 0 0% 4%;
+  --foreground: 43 15% 93%;
 
-  --popover: 240 28% 14%;
-  --popover-foreground: 240 4.8% 95.9%;
-  --popover-border: 0 0% 100% / 0.08;
+  /* Card surface: very dark with slight warmth */
+  --card: 0 0% 7%;
+  --card-foreground: 43 15% 93%;
+  --card-border: 43 89% 55% / 0.1;
 
-  /* Accent/Primary: #7c3aed -> hsl(262.1 83.3% 57.8%) */
-  --primary: 262.1 83.3% 57.8%;
-  --primary-foreground: 210 40% 98%;
-  
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 240 4.8% 95.9%;
+  --popover: 0 0% 8%;
+  --popover-foreground: 43 15% 93%;
+  --popover-border: 43 89% 55% / 0.15;
 
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
+  /* Gold Primary — warm amber gold */
+  --primary: 43 89% 55%;
+  --primary-foreground: 0 0% 5%;
 
-  --accent: 262.1 83.3% 57.8%;
-  --accent-foreground: 210 40% 98%;
+  --secondary: 0 0% 11%;
+  --secondary-foreground: 43 15% 88%;
+
+  --muted: 0 0% 11%;
+  --muted-foreground: 0 0% 52%;
+
+  --accent: 43 89% 55%;
+  --accent-foreground: 0 0% 5%;
 
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 0 0% 100% / 0.08;
-  --input: 0 0% 100% / 0.12;
-  --ring: 262.1 83.3% 57.8%;
+  --border: 43 89% 55% / 0.12;
+  --input: 43 89% 55% / 0.1;
+  --ring: 43 89% 55%;
 
   --app-font-sans: 'Inter', sans-serif;
-  --app-font-serif: Georgia, serif;
+  --app-font-serif: 'Cinzel', Georgia, serif;
   --app-font-mono: Menlo, monospace;
   --radius: 0.75rem;
-  
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.5);
 
   --primary-border: hsl(var(--primary));
   --secondary-border: hsl(var(--secondary));
@@ -117,4 +117,63 @@
     @apply font-sans antialiased bg-background text-foreground;
     selection-color: hsl(var(--primary) / 0.3);
   }
+}
+
+/* ── Gold gradient text utility ── */
+@layer utilities {
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #f5c842 0%, #e8a800 40%, #f5c842 70%, #c9860a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .border-gold-subtle {
+    border-color: hsl(43 89% 55% / 0.18);
+  }
+
+  .bg-gold-glow {
+    box-shadow: 0 0 60px hsl(43 89% 55% / 0.15), 0 0 120px hsl(43 89% 55% / 0.08);
+  }
+}
+
+/* ── Ticker animation ── */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-ticker {
+  animation: ticker-scroll 28s linear infinite;
+}
+
+/* ── Slow spin for decorative ring ── */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 18s linear infinite;
+}
+
+/* ── Pulse glow ── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px hsl(43 89% 55% / 0.3), 0 0 60px hsl(43 89% 55% / 0.1); }
+  50%       { box-shadow: 0 0 35px hsl(43 89% 55% / 0.5), 0 0 90px hsl(43 89% 55% / 0.2); }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ── Shimmer sweep ── */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+.animate-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+  border-radius: inherit;
 }

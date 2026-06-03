@@ -100,18 +100,18 @@ export default function AboutPage() {
 
       {/* Founder */}
       <FadeInSection>
-        <div className="rounded-3xl bg-card/50 backdrop-blur-sm border border-white/8 p-8 sm:p-12 mb-10 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-primary/8 blur-[100px] pointer-events-none" />
+        <div className="rounded-3xl backdrop-blur-sm p-8 sm:p-12 mb-10 relative overflow-hidden" style={{ background: "rgba(245,200,66,0.03)", border: "1px solid rgba(245,200,66,0.12)" }}>
+          <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-[100px] pointer-events-none" style={{ background: "radial-gradient(circle, rgba(245,200,66,0.07) 0%, transparent 70%)" }} />
           <div className="relative z-10">
             <div className="flex flex-col sm:flex-row gap-8 items-start mb-8">
               <div className="flex-shrink-0">
-                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/40 to-primary/10 border border-primary/30 flex items-center justify-center text-primary font-black text-2xl shadow-xl shadow-primary/10">
+                <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-black font-black text-2xl shadow-xl" style={{ background: "linear-gradient(135deg, #f5c842 0%, #e8a200 50%, #c97c08 100%)", boxShadow: "0 8px 30px rgba(245,200,66,0.25)", fontFamily: "'Cinzel', serif" }}>
                   AH
                 </div>
               </div>
               <div className="flex-1">
                 <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-1" data-testid="text-founder-name">Adil Husain</h2>
-                <p className="text-primary text-sm font-semibold mb-4">Founder & Builder, SAH Ecosystem</p>
+                <p className="text-amber-400 text-sm font-semibold mb-4">Founder &amp; Builder, SAH Ecosystem</p>
                 <p className="text-muted-foreground leading-relaxed text-base">
                   AI Builder, Automation Engineer, Product Creator and Independent Developer focused on building practical AI applications, automation systems, developer tools and productivity platforms.
                 </p>
@@ -146,7 +146,8 @@ export default function AboutPage() {
           {timelineStats.map((stat) => (
             <div
               key={stat.label}
-              className="rounded-2xl bg-card/60 backdrop-blur-sm border border-white/8 p-5 text-center hover:border-primary/20 transition-colors"
+              className="rounded-2xl backdrop-blur-sm p-5 text-center transition-colors"
+              style={{ background: "rgba(245,200,66,0.04)", border: "1px solid rgba(245,200,66,0.1)" }}
               data-testid={`stat-about-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}
             >
               <div className="text-3xl font-black text-primary mb-1">{stat.value}</div>
@@ -158,7 +159,7 @@ export default function AboutPage() {
 
       {/* Specializations */}
       <FadeInSection delay={0.1}>
-        <div className="rounded-3xl bg-card/40 backdrop-blur-sm border border-white/8 p-8 mb-10">
+        <div className="rounded-3xl backdrop-blur-sm p-8 mb-10" style={{ background: "rgba(245,200,66,0.03)", border: "1px solid rgba(245,200,66,0.1)" }}>
           <h2 className="text-xl font-bold text-foreground mb-6">Specializing In</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {specializations.map((spec, i) => (
@@ -167,7 +168,8 @@ export default function AboutPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4, delay: 0.2 + i * 0.05 }}
-                className="flex items-center gap-3 p-4 rounded-xl bg-primary/8 border border-primary/15 hover:bg-primary/12 hover:border-primary/25 transition-all"
+                className="flex items-center gap-3 p-4 rounded-xl transition-all"
+                style={{ background: "rgba(245,200,66,0.06)", border: "1px solid rgba(245,200,66,0.14)" }}
                 data-testid={`spec-${spec.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
                 <span className="text-primary flex-shrink-0">{spec.icon}</span>
@@ -180,14 +182,14 @@ export default function AboutPage() {
 
       {/* Mission */}
       <FadeInSection delay={0.15}>
-        <div className="rounded-3xl bg-gradient-to-br from-primary/15 via-primary/8 to-transparent border border-primary/20 p-8 sm:p-12 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent pointer-events-none" />
+        <div className="rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(245,200,66,0.08) 0%, rgba(245,160,20,0.04) 50%, transparent 100%)", border: "1px solid rgba(245,200,66,0.18)" }}>
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(245,200,66,0.1) 0%, transparent 60%)" }} />
           <div className="relative z-10">
-            <div className="w-12 h-12 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center mx-auto mb-6">
-              <Target size={20} className="text-primary" />
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: "rgba(245,200,66,0.12)", border: "1px solid rgba(245,200,66,0.25)" }}>
+              <Target size={20} className="text-amber-400" />
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-3">Mission</h2>
-            <p className="text-primary/70 font-semibold text-sm tracking-widest uppercase mb-4">Build. Automate. Scale.</p>
+            <p className="text-amber-400/70 font-semibold text-sm tracking-widest uppercase mb-4">Build. Automate. Scale.</p>
             <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto">
               Build intelligent software that automates work, improves productivity and solves real-world problems — one product at a time.
             </p>
