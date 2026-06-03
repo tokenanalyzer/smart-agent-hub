@@ -33,7 +33,6 @@ services:
   - type: web
     name: sah-api
     runtime: node
-    plan: free
     region: oregon
 
     # Install pnpm, install all workspace deps, push DB schema, build API
@@ -96,7 +95,6 @@ services:
   - type: web
     name: sah-frontend
     runtime: static
-    plan: free
 
     # Vite requires PORT and BASE_PATH at build time (vite.config.ts enforces this)
     buildCommand: |
