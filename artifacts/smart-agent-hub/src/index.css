@@ -116,6 +116,9 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
     selection-color: hsl(var(--primary) / 0.3);
+    /* Subtle gold dot-grid across entire site */
+    background-image: radial-gradient(rgba(245, 200, 66, 0.10) 1px, transparent 1px);
+    background-size: 36px 36px;
   }
 }
 

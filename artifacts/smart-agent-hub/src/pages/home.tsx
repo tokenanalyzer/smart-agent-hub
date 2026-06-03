@@ -247,13 +247,74 @@ export default function HomePage() {
       {/* ── Hero ── */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
         {/* Background glow orbs */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-[140px]"
-            style={{ background: "radial-gradient(circle, rgba(245,200,66,0.08) 0%, transparent 70%)" }}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Center large orb */}
+          <motion.div
+            className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(245,200,66,0.13) 0%, rgba(245,160,20,0.06) 40%, transparent 70%)" }}
+            animate={{ scale: [1, 1.08, 1], opacity: [0.7, 1, 0.7] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full blur-[100px]"
-            style={{ background: "radial-gradient(circle, rgba(245,160,20,0.05) 0%, transparent 70%)" }}
+          {/* Top-left orb */}
+          <motion.div
+            className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(245,200,66,0.09) 0%, transparent 65%)" }}
+            animate={{ scale: [1, 1.12, 1] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
           />
+          {/* Bottom-right orb */}
+          <motion.div
+            className="absolute -bottom-20 -right-20 w-[450px] h-[450px] rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(245,160,20,0.08) 0%, transparent 65%)" }}
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          />
+          {/* Decorative large ring — top right */}
+          <motion.div
+            className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full"
+            style={{ border: "1px solid rgba(245,200,66,0.08)" }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+          />
+          <div
+            className="absolute -top-20 -right-20 w-[380px] h-[380px] rounded-full"
+            style={{ border: "1px dashed rgba(245,200,66,0.06)" }}
+          />
+          {/* Decorative large ring — bottom left */}
+          <motion.div
+            className="absolute -bottom-40 -left-40 w-[520px] h-[520px] rounded-full"
+            style={{ border: "1px solid rgba(245,200,66,0.07)" }}
+            animate={{ rotate: -360 }}
+            transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
+          />
+          {/* Horizontal gold line */}
+          <div
+            className="absolute top-1/2 left-0 right-0 h-px"
+            style={{ background: "linear-gradient(90deg, transparent 0%, rgba(245,200,66,0.08) 30%, rgba(245,200,66,0.15) 50%, rgba(245,200,66,0.08) 70%, transparent 100%)" }}
+          />
+          {/* Corner bracket — top left */}
+          <svg className="absolute top-8 left-8 opacity-20" width="60" height="60" fill="none">
+            <path d="M0 30 L0 0 L30 0" stroke="#f5c842" strokeWidth="1.5" />
+          </svg>
+          {/* Corner bracket — top right */}
+          <svg className="absolute top-8 right-8 opacity-20" width="60" height="60" fill="none">
+            <path d="M60 30 L60 0 L30 0" stroke="#f5c842" strokeWidth="1.5" />
+          </svg>
+          {/* Corner bracket — bottom left */}
+          <svg className="absolute bottom-8 left-8 opacity-20" width="60" height="60" fill="none">
+            <path d="M0 30 L0 60 L30 60" stroke="#f5c842" strokeWidth="1.5" />
+          </svg>
+          {/* Corner bracket — bottom right */}
+          <svg className="absolute bottom-8 right-8 opacity-20" width="60" height="60" fill="none">
+            <path d="M60 30 L60 60 L30 60" stroke="#f5c842" strokeWidth="1.5" />
+          </svg>
+          {/* Faint watermark text */}
+          <div
+            className="absolute inset-0 flex items-center justify-center select-none pointer-events-none"
+            style={{ fontSize: "28vw", fontFamily: "'Cinzel', serif", fontWeight: 900, color: "rgba(245,200,66,0.025)", lineHeight: 1, letterSpacing: "0.1em" }}
+          >
+            SAH
+          </div>
         </div>
 
         {/* Floating gold particles */}
