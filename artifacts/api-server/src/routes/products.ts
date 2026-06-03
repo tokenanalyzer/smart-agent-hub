@@ -57,8 +57,15 @@ router.post("/products", requireAuth, async (req: Request, res: Response) => {
     return;
   }
   try {
+    // Auto-assign sortOrder to max + 1 if not provided
+    let sortOrder = parsed.data.sortOrder;
+    if (sortOrder === undefined || sortOrder === null) {
+      const rows = await db.select({ sortOrder: productsTable.sortOrder }).from(productsTable).orderBy(productsTable.sortOrder);
+      sortOrder = rows.length > 0 ? Math.max(...rows.map((r) => r.sortOrder)) + 1 : 0;
+    }
     const insertData = insertProductSchema.parse({
       ...parsed.data,
+      sortOrder,
       publishedState: parsed.data.publishedState ?? "draft",
     });
     const [row] = await db.insert(productsTable).values(insertData).returning();

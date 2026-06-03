@@ -95,7 +95,7 @@ export const CreateProductBody = zod.object({
   "screenshot4Url": zod.string().nullish(),
   "accentColor": zod.string(),
   "publishedState": zod.enum(['draft', 'published', 'archived']).optional(),
-  "sortOrder": zod.number()
+  "sortOrder": zod.number().optional()
 })
 
 

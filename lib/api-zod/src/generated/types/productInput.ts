@@ -40,5 +40,5 @@ export interface ProductInput {
   screenshot4Url?: string | null;
   accentColor: string;
   publishedState?: ProductInputPublishedState;
-  sortOrder: number;
+  sortOrder?: number;
 }
